@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chef's Weekly Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm-white: #FFFDF9;
+    --ink: #1A1612;
+    --ink-light: #4A4440;
+    --ink-muted: #8A7E78;
+    --gold: #C9923A;
+    --gold-light: #E8C07A;
+    --gold-pale: #F5EDD8;
+    --sage: #5C7A5C;
+    --sage-light: #EAF0EA;
+    --border: rgba(26,22,18,0.1);
+    --border-strong: rgba(26,22,18,0.2);
+    --shadow: 0 2px 20px rgba(26,22,18,0.08);
+    --shadow-lg: 0 8px 40px rgba(26,22,18,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── NAV ── */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,247,242,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 6px; align-items: center; }
+  .nav-btn {
+    background: none; border: 1px solid var(--border-strong);
+    border-radius: 8px; padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--ink-light); cursor: pointer; transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
+  .nav-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 120%, rgba(201,146,58,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 6vw, 42px); font-weight: 700;
+    color: white; line-height: 1.15; margin-bottom: 12px;
+  }
+  .hero p { color: rgba(255,255,255,0.55); font-size: 14px; }
+  .week-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px; padding: 8px 16px;
+    font-size: 13px; color: rgba(255,255,255,0.7);
+    margin-top: 1.25rem;
+  }
+  .week-dot { width: 7px; height: 7px; background: var(--gold); border-radius: 50%; }
+
+  /* ── DAY TABS ── */
+  .day-strip {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    display: flex; gap: 0; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .day-strip::-webkit-scrollbar { display: none; }
+  .day-tab {
+    flex-shrink: 0; padding: 14px 18px;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink-muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .day-tab:hover { color: var(--ink); }
+  .day-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .day-tab .day-date { display: block; font-size: 11px; font-weight: 300; margin-top: 1px; }
+
+  /* ── MEAL CARDS ── */
+  .meals-wrapper { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+  .meal-section { margin-bottom: 1rem; }
+  .meal-time-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-muted);
+    margin-bottom: 8px; padding-left: 2px;
+  }
+
+  .meal-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.25rem 1rem;
+    transition: box-shadow 0.2s;
+  }
+  .meal-card:hover { box-shadow: var(--shadow); }
+
+  .meal-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .meal-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .meal-avg {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--gold-pale); border-radius: 100px;
+    padding: 3px 10px; font-size: 12px; font-weight: 500; color: var(--gold);
+    flex-shrink: 0; margin-left: 10px;
+  }
+  .meal-avg svg { width: 11px; height: 11px; fill: var(--gold); flex-shrink: 0; }
+  .meal-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 1rem; }
+
+  .stars-row { display: flex; align-items: center; gap: 4px; }
+  .star-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 24px; line-height: 1; padding: 2px;
+    color: var(--border-strong); transition: all 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .star-btn.lit { color: var(--gold-light); }
+  .star-btn.lit.rated { color: var(--gold); }
+  .star-btn:hover { transform: scale(1.2); }
+
+  .rating-count { font-size: 12px; color: var(--ink-muted); margin-left: 8px; }
+
+  .rated-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 8px; font-size: 12px; color: var(--sage);
+    background: var(--sage-light); border-radius: 6px; padding: 4px 10px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--ink-muted);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 1rem; }
+  .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink); margin-bottom: 8px; }
+
+  /* ── QR VIEW ── */
+  .qr-section {
+    max-width: 440px; margin: 0 auto;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .qr-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .qr-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; margin-bottom: 6px;
+  }
+  .qr-card p { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+  #qrcode { display: flex; justify-content: center; margin: 1.5rem 0; }
+  #qrcode img, #qrcode canvas { border-radius: 10px; }
+  .qr-url {
+    font-size: 12px; color: var(--ink-muted);
+    background: var(--cream); border-radius: 8px;
+    padding: 8px 12px; word-break: break-all;
+    font-family: monospace;
+  }
+  .url-input-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .url-input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border-strong);
+    border-radius: 10px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white); color: var(--ink);
+    outline: none;
+  }
+  .url-input:focus { border-color: var(--gold); }
+  .gen-btn {
+    padding: 10px 18px; background: var(--ink); color: white;
+    border: none; border-radius: 10px; font-size: 13px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    white-space: nowrap;
+  }
+  .dl-btn {
+    display: block; width: 100%; padding: 12px;
+    background: var(--gold); color: white;
+    border: none; border-radius: 12px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    margin-top: 1rem;
+  }
+
+  /* ── ADMIN VIEW ── */
+  .admin-wrap { max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; }
+
+  /* Login */
+  .login-box {
+    max-width: 360px; margin: 4rem auto;
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem;
+    text-align: center;
+  }
+  .login-box h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+  .field { margin-bottom: 12px; text-align: left; }
+  .field label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-muted); margin-bottom: 4px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white); color: var(--ink); outline: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .primary-btn {
+    width: 100%; padding: 12px; background: var(--ink); color: white;
+    border: none; border-radius: 12px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .primary-btn:hover { opacity: 0.85; }
+  .err-msg { font-size: 13px; color: #c0392b; margin-top: 8px; }
+
+  /* Admin tabs */
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap;}
+  .admin-tab {
+    padding: 8px 18px; border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    background: none; color: var(--ink-light);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .admin-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  /* Meal editor */
+  .week-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .week-selector label { font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .week-selector input {
+    padding: 8px 12px; border: 1px solid var(--border-strong);
+    border-radius: 10px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white); color: var(--ink); outline: none;
+  }
+  .day-editor { margin-bottom: 1.5rem; }
+  .day-editor-header {
+    font-weight: 500; font-size: 14px;
+    background: var(--cream); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; border: 1px solid var(--border);
+  }
+  .day-editor-body { display: flex; flex-direction: column; gap: 8px; }
+  .meal-row {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px;
+    display: grid; grid-template-columns: 100px 1fr;
+    gap: 8px; align-items: start;
+  }
+  .meal-row-type {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--gold);
+    padding-top: 10px;
+  }
+  .meal-row-fields { display: flex; flex-direction: column; gap: 6px; }
+  .inline-input {
+    width: 100%; padding: 8px 10px;
+    border: 1px solid var(--border-strong); border-radius: 8px;
+    font-size: 13px; font-family: 'DM Sans', sans-serif;
+    background: var(--cream); color: var(--ink); outline: none;
+  }
+  .inline-input:focus { border-color: var(--gold); background: white; }
+  .save-week-btn {
+    padding: 12px 24px; background: var(--sage); color: white;
+    border: none; border-radius: 12px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .save-msg { font-size: 13px; color: var(--sage); margin-left: 12px; font-weight: 500; }
+
+  /* Leaderboard & Items */
+  .lb-filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .lb-filter {
+    padding: 6px 14px; border-radius: 100px;
+    border: 1px solid var(--border-strong);
+    font-size: 12px; cursor: pointer; background: none;
+    color: var(--ink-light); font-family: 'DM Sans', sans-serif;
+  }
+  .lb-filter.active { background: var(--gold); color: white; border-color: var(--gold); }
+
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table th {
+    text-align: left; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lb-table td {
+    padding: 12px; border-bottom: 1px solid var(--border);
+    font-size: 14px; vertical-align: middle;
+  }
+  .lb-table tr:last-child td { border-bottom: none; }
+  .lb-table tr:hover td { background: var(--cream); }
+  .lb-rank {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700; color: var(--ink-muted);
+    width: 36px;
+  }
+  .lb-rank.top { color: var(--gold); }
+  .lb-meal-name { font-weight: 500; color: var(--ink); }
+  .lb-meal-meta { font-size: 12px; color: var(--ink-muted); }
+  .lb-avg {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--gold-pale); border-radius: 100px;
+    padding: 3px 10px; font-size: 13px; font-weight: 500; color: var(--gold);
+  }
+  .lb-avg svg { width: 11px; height: 11px; fill: var(--gold); }
+  .lb-count { font-size: 12px; color: var(--ink-muted); }
+
+  .section-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: white; border-radius: 100px;
+    padding: 10px 20px; font-size: 13px; font-weight: 500;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    z-index: 999; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Responsive */
+  @media(max-width: 480px) {
+    .meal-row { grid-template-columns: 80px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo">Chef<span>'s</span> Table</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showView('menu')">Menu</button>
+    <button class="nav-btn" onclick="showView('qr')">QR Code</button>
+    <button class="nav-btn" onclick="showView('admin')">Admin</button>
+  </div>
+</nav>
+
+<div id="view-menu" class="view active">
+  <div class="hero">
+    <div class="hero-eyebrow">This week's offerings</div>
+    <h1>Chef's Weekly<br>Menu</h1>
+    <div class="week-badge">
+      <div class="week-dot"></div>
+      <span id="hero-week-label">Loading...</span>
+    </div>
+  </div>
+
+  <div class="day-strip" id="dayTabs"></div>
+
+  <div class="meals-wrapper" id="mealsContainer">
+    <div class="empty-state">
+      <div class="icon">🍽️</div>
+      <h3>Loading Menu...</h3>
+      <p>Fetching the latest data from the cloud.</p>
+    </div>
+  </div>
+</div>
+
+<div id="view-qr" class="view">
+  <div class="qr-section">
+    <div class="qr-card">
+      <h2>Generate QR Code</h2>
+      <p>Enter the URL where this page is hosted, then generate a QR code to print or display for guests.</p>
+      <div class="url-input-row">
+        <input class="url-input" id="qrUrlInput" type="url" placeholder="https://your-site.com/menu" />
+        <button class="gen-btn" onclick="generateQR()">Generate</button>
+      </div>
+      <div id="qrcode"></div>
+      <div class="qr-url" id="qrUrlDisplay" style="display:none"></div>
+      <button class="dl-btn" id="dlBtn" style="display:none" onclick="downloadQR()">Download QR Code</button>
+    </div>
+    <div style="font-size:13px; color:var(--ink-muted); text-align:center; line-height:1.8;">
+      <strong>How to deploy this file:</strong><br>
+      Upload this file to any static host<br>
+      (Netlify, GitHub Pages, Vercel — all free).<br>
+      Then paste that URL above to generate your QR code.
+    </div>
+  </div>
+</div>
+
+<div id="view-admin" class="view">
+
+  <div id="adminLogin">
+    <div class="login-box">
+      <h2>Admin Access</h2>
+      <p>Enter your password to manage meals and view ratings.</p>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')adminLogin()" />
+      </div>
+      <button class="primary-btn" onclick="adminLogin()">Sign In</button>
+      <div class="err-msg" id="loginErr"></div>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:12px;">Default password: <code>chef1234</code> — change in settings</p>
+    </div>
+  </div>
+
+  <div id="adminDash" style="display:none">
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <h2>Admin Dashboard</h2>
+        <button class="nav-btn" onclick="adminLogout()">Sign out</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('editor', this)">Edit Menu</button>
+        <button class="admin-tab" onclick="switchAdminTab('items', this)">Items</button>
+        <button class="admin-tab" onclick="switchAdminTab('leaderboard', this)">Leaderboard</button>
+        <button class="admin-tab" onclick="switchAdminTab('settings', this)">Settings</button>
+      </div>
+
+      <div id="tab-editor">
+        <div class="week-selector">
+          <label>Week of:</label>
+          <input type="date" id="weekStartInput" />
+          <button class="nav-btn" onclick="loadEditorWeek()">Load</button>
+        </div>
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">
+          Select an item from your catalog to assign it to the menu. <br>Need a new dish? Add it in the <strong>Items</strong> tab first.
+        </p>
+        <div id="dayEditors"></div>
+        <div style="display:flex;align-items:center;margin-top:1.5rem;">
+          <button class="save-week-btn" onclick="saveWeekMeals()">Save this week's menu</button>
+          <span class="save-msg" id="saveMsg" style="display:none">✓ Saved!</span>
+        </div>
+      </div>
+
+      <div id="tab-items" style="display:none">
+        <div class="section-card" style="padding:1.5rem; margin-bottom:1.5rem;">
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;">Add New Item</h3>
+          <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">Create dishes here so you can assign them to the weekly menu. Ratings carry over when the same item is used again!</p>
+          <div class="field"><label>Item Name</label><input type="text" id="newItemName" placeholder="e.g. Lemon Pepper Wings" /></div>
+          <div class="field"><label>Default Description</label><input type="text" id="newItemDesc" placeholder="e.g. Served with celery and blue cheese" /></div>
+          <button class="primary-btn" style="width:auto;padding:10px 24px;" onclick="createCatalogItem()">Add to Catalog</button>
+        </div>
+        
+        <div class="section-card">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="catalogBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-leaderboard" style="display:none">
+        <div class="lb-filters">
+          <button class="lb-filter active" onclick="renderLeaderboard('all',this)">All meals</button>
+          <button class="lb-filter" onclick="renderLeaderboard('Breakfast',this)">Breakfast</button>
+          <button class="lb-filter" onclick="renderLeaderboard('Lunch',this)">Lunch</button>
+          <button class="lb-filter" onclick="renderLeaderboard('Dinner',this)">Dinner</button>
+        </div>
+        <div class="section-card">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Meal</th>
+                <th>Avg</th>
+                <th>Ratings</th>
+              </tr>
+            </thead>
+            <tbody id="lbBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-settings" style="display:none">
+        <div class="section-card" style="padding:1.5rem;">
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;">Change Password</h3>
+          <div class="field"><label>Current password</label><input type="password" id="curPass" /></div>
+          <div class="field"><label>New password</label><input type="password" id="newPass" /></div>
+          <div class="field"><label>Confirm new password</label><input type="password" id="confPass" /></div>
+          <button class="primary-btn" style="width:auto;padding:10px 24px;" onclick="changePassword()">Update password</button>
+          <div class="err-msg" id="passMsg"></div>
+        </div>
+        <div class="section-card" style="padding:1.5rem;margin-top:1rem;">
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:8px;">Reset all ratings</h3>
+          <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">This will permanently delete all collected ratings from the cloud database.</p>
+          <button class="nav-btn" onclick="clearRatings()" style="color:#c0392b;border-color:#c0392b;">Clear all ratings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+// 1. Initialize Firebase with your exact config
+const firebaseConfig = {
+  apiKey: "AIzaSyDe7cQPav_8tHeHBFQ2atxmtANf9zxvN2M",
+  authDomain: "weekly-menu-5bc28.firebaseapp.com",
+  databaseURL: "https://weekly-menu-5bc28-default-rtdb.firebaseio.com",
+  projectId: "weekly-menu-5bc28",
+  storageBucket: "weekly-menu-5bc28.firebasestorage.app",
+  messagingSenderId: "936530103301",
+  appId: "1:936530103301:web:a74d1fda34ea57ae37a06c",
+  measurementId: "G-FKXEF5K63P"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const MEALS = ['Breakfast','Lunch','Dinner'];
+
+// We store our database here so the app feels instant
+let cloudData = { weeks: {}, catalog: [], ratings: {}, password: 'chef1234' };
+let initialLoad = true;
+
+// Listen for live updates from the database
+db.ref('/').on('value', (snapshot) => {
+  if (snapshot.exists()) {
+    cloudData = snapshot.val();
+    if (!cloudData.weeks) cloudData.weeks = {};
+    if (!cloudData.catalog) cloudData.catalog = [];
+    if (!cloudData.ratings) cloudData.ratings = {};
+  } else if (initialLoad) {
+    // If the database is completely empty (first time running), seed it
+    seedIfEmptyFirebase();
+  }
+  
+  initialLoad = false;
+  
+  // Magic: Auto-refresh the screen if data changes while looking at it!
+  if (document.getElementById('view-menu').classList.contains('active')) renderMenu();
+  if (adminLoggedIn) {
+    if (document.getElementById('tab-editor').style.display === 'block') loadEditorWeek();
+    if (document.getElementById('tab-items').style.display === 'block') renderCatalog();
+    if (document.getElementById('tab-leaderboard').style.display === 'block') renderLeaderboard('all', document.querySelector('.lb-filter.active'));
+  }
+});
+
+
+// ══════════════════════════════════════════
+//  FIREBASE CLOUD DATA LAYER
+// ══════════════════════════════════════════
+function getPassword() { return cloudData.password || 'chef1234'; }
+function setPassword(p) { db.ref('password').set(p); }
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().split('T')[0];
+}
+
+function currentWeekKey() { return getMonday(new Date()); }
+
+function getMeals(weekKey) { return cloudData.weeks[weekKey] || null; }
+function setMeals(weekKey, meals) { db.ref('weeks/' + weekKey).set(meals); }
+
+// ── CATALOG ITEMS STORE ──
+function getCatalog() { return cloudData.catalog || []; }
+function saveCatalog(c) { db.ref('catalog').set(c); }
+function mealKey(name) { return name.trim().toLowerCase(); }
+
+// ── RATINGS STORE ──
+function getItemStore() { return cloudData.ratings || {}; }
+function saveItemStore(s) { db.ref('ratings').set(s); }
+
+function getItemRatings(name) {
+  return cloudData.ratings[mealKey(name)]?.ratings || [];
+}
+
+function addItemRating(name, type, stars) {
+  const k = mealKey(name);
+  const currentItem = cloudData.ratings[k] || { name, type, ratings: [] };
+  let currentRatings = currentItem.ratings || [];
+  currentRatings.push(stars);
+  db.ref('ratings/' + k).set({ name, type, ratings: currentRatings });
+}
+
+function updateItemRating(name, oldStars, newStars) {
+  const k = mealKey(name);
+  if (!cloudData.ratings[k]) { addItemRating(name, '', newStars); return; }
+  let currentRatings = cloudData.ratings[k].ratings || [];
+  const idx = currentRatings.indexOf(oldStars);
+  if (idx !== -1) currentRatings[idx] = newStars;
+  else currentRatings.push(newStars); 
+  db.ref('ratings/' + k + '/ratings').set(currentRatings);
+}
+
+// ── PERSONAL RATINGS (localStorage keeps devices from double-voting) ──
+function getMyRatingStore() {
+  try { return JSON.parse(localStorage.getItem('chefMyRatings') || '{}'); } catch { return {}; }
+}
+function getMyRating(name) { return getMyRatingStore()[mealKey(name)] || 0; }
+function setMyRating(name, stars) {
+  const r = getMyRatingStore();
+  r[mealKey(name)] = stars;
+  localStorage.setItem('chefMyRatings', JSON.stringify(r));
+}
+
+// ══════════════════════════════════════════
+//  NAVIGATION & UI (Unchanged)
+// ══════════════════════════════════════════
+const views = ['menu','qr','admin'];
+function showView(v) {
+  views.forEach(id => {
+    document.getElementById('view-'+id).classList.toggle('active', id===v);
+  });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    if(views[i]) b.classList.toggle('active', views[i]===v);
+  });
+  if (v === 'menu') renderMenu();
+  if (v === 'admin') renderAdminInit();
+}
+
+let activeDay = 0;
+let currentMenuWeek = null;
+
+function formatWeekLabel(weekKey) {
+  const start = new Date(weekKey + 'T12:00:00');
+  const end = new Date(start); end.setDate(end.getDate() + 4);
+  const fmt = d => d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  return `${fmt(start)} – ${fmt(end)}, ${start.getFullYear()}`;
+}
+
+function renderMenu() {
+  currentMenuWeek = currentWeekKey();
+  const meals = getMeals(currentMenuWeek);
+  
+  if(!meals) {
+     document.getElementById('mealsContainer').innerHTML = `<div class="empty-state">
+      <div class="icon">🍽️</div>
+      <h3>No meals this week yet</h3>
+      <p>Check back soon or ask the admin to add this week's menu.</p>
+    </div>`;
+  }
+
+  document.getElementById('hero-week-label').textContent = formatWeekLabel(currentMenuWeek);
+
+  const tabs = document.getElementById('dayTabs');
+  const dayDates = DAYS.map((_, i) => {
+    const d = new Date(currentMenuWeek + 'T12:00:00');
+    d.setDate(d.getDate() + i);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  });
+  tabs.innerHTML = DAYS.map((day, i) =>
+    `<div class="day-tab ${i===activeDay?'active':''}" onclick="switchDay(${i})">
+      ${day.slice(0,3)} <span class="day-date">${dayDates[i]}</span>
+    </div>`
+  ).join('');
+
+  renderDayMeals(meals);
+}
+
+function switchDay(i) {
+  activeDay = i;
+  renderMenu();
+}
+
+function renderDayMeals(meals) {
+  const container = document.getElementById('mealsContainer');
+  if (!meals || !meals[activeDay] || !meals[activeDay].some(m => m.name)) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="icon">🍽️</div>
+      <h3>No meals planned</h3>
+      <p>Check back soon — the chef hasn't added ${DAYS[activeDay]}'s menu yet.</p>
+    </div>`;
+    return;
+  }
+
+  const dayMeals = meals[activeDay];
+  container.innerHTML = dayMeals.map((meal, mealIdx) => {
+    if (!meal.name) return '';
+    const ratings = getItemRatings(meal.name);
+    const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : 0;
+    const myRating = getMyRating(meal.name);
+    const starSvg = `<svg viewBox="0 0 12 12"><path d="M6 1l1.3 2.6L10 4l-2 1.9.5 2.7L6 7.4l-2.5 1.2.5-2.7L2 4l2.7-.4z"/></svg>`;
+
+    return `<div class="meal-section">
+      <div class="meal-time-label">${meal.type}</div>
+      <div class="meal-card">
+        <div class="meal-card-top">
+          <div class="meal-name">${meal.name}</div>
+          ${ratings.length ? `<div class="meal-avg">${starSvg}${avg.toFixed(1)}</div>` : ''}
+        </div>
+        ${meal.desc ? `<div class="meal-desc">${meal.desc}</div>` : ''}
+        <div class="stars-row" id="stars-${activeDay}-${mealIdx}">
+          ${[1,2,3,4,5].map(s =>
+            `<button class="star-btn ${myRating>=s?'lit rated':''}" onclick="rateMeal(${activeDay},${mealIdx},${s})" aria-label="${s} star">★</button>`
+          ).join('')}
+          <span class="rating-count">${ratings.length} rating${ratings.length!==1?'s':''}</span>
+        </div>
+        ${myRating ? `<div class="rated-badge">✓ You rated this ${myRating} star${myRating!==1?'s':''}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rateMeal(dayIdx, mealIdx, stars) {
+  const meals = getMeals(currentMenuWeek);
+  const meal = meals[dayIdx][mealIdx];
+  const prev = getMyRating(meal.name);
+  if (prev) {
+    updateItemRating(meal.name, prev, stars);
+  } else {
+    addItemRating(meal.name, meal.type, stars);
+  }
+  setMyRating(meal.name, stars);
+  showToast('Rating saved to the cloud!');
+}
+
+let qrInstance = null;
+function generateQR() {
+  const url = document.getElementById('qrUrlInput').value.trim();
+  if (!url) { showToast('Please enter a URL first'); return; }
+  const box = document.getElementById('qrcode');
+  box.innerHTML = '';
+  qrInstance = new QRCode(box, {
+    text: url, width: 220, height: 220,
+    colorDark: '#1A1612', colorLight: '#FFFDF9',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  document.getElementById('qrUrlDisplay').textContent = url;
+  document.getElementById('qrUrlDisplay').style.display = 'block';
+  document.getElementById('dlBtn').style.display = 'block';
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) { showToast('Generate a QR code first'); return; }
+  const link = document.createElement('a');
+  link.download = 'chef-menu-qr.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+let adminLoggedIn = false;
+
+function renderAdminInit() {
+  document.getElementById('adminLogin').style.display = adminLoggedIn ? 'none' : 'block';
+  document.getElementById('adminDash').style.display = adminLoggedIn ? 'block' : 'none';
+  if (adminLoggedIn) {
+    document.getElementById('weekStartInput').value = getMonday(new Date());
+    loadEditorWeek();
+  }
+}
+
+function adminLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === getPassword()) {
+    adminLoggedIn = true;
+    document.getElementById('loginErr').textContent = '';
+    document.getElementById('adminPass').value = '';
+    renderAdminInit();
+  } else {
+    document.getElementById('loginErr').textContent = 'Incorrect password.';
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
+  renderAdminInit();
+}
+
+function switchAdminTab(name, btn) {
+  ['editor','items','leaderboard','settings'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name === 'leaderboard') renderLeaderboard('all', document.querySelector('.lb-filter'));
+  if (name === 'items') renderCatalog();
+  if (name === 'editor') loadEditorWeek();
+}
+
+function createCatalogItem() {
+  const name = document.getElementById('newItemName').value.trim();
+  const desc = document.getElementById('newItemDesc').value.trim();
+  if(!name) { showToast('Item name is required'); return; }
+  
+  const cat = getCatalog();
+  if(cat.find(c => mealKey(c.name) === mealKey(name))) {
+    showToast('An item with this name already exists'); return;
+  }
+  
+  cat.push({ name, desc });
+  saveCatalog(cat);
+  
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemDesc').value = '';
+  showToast('Item added to cloud catalog');
+}
+
+function deleteCatalogItem(name) {
+  if(!confirm('Are you sure you want to remove this item? (Previous menus keep their data)')) return;
+  let cat = getCatalog();
+  cat = cat.filter(c => c.name !== name);
+  saveCatalog(cat);
+}
+
+function renderCatalog() {
+  const tbody = document.getElementById('catalogBody');
+  const cat = getCatalog();
+  if(cat.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;">No items created yet. Add a dish above!</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = cat.map(c => `
+    <tr>
+      <td style="font-weight:500;">${c.name}</td>
+      <td style="color:var(--ink-muted); font-size: 13px;">${c.desc || '—'}</td>
+      <td style="text-align:right;">
+        <button class="nav-btn" style="padding:4px 8px;font-size:11px;" onclick="deleteCatalogItem('${c.name.replace(/'/g, "\\'")}')">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function loadEditorWeek() {
+  const weekKey = getMonday(new Date(document.getElementById('weekStartInput').value + 'T12:00:00'));
+  const saved = getMeals(weekKey) || DAYS.map(() => MEALS.map(t => ({ type: t, name: '', desc: '' })));
+  const catalog = getCatalog();
+  
+  const wrap = document.getElementById('dayEditors');
+  wrap.innerHTML = DAYS.map((day, di) => {
+    const dayDate = new Date(weekKey + 'T12:00:00');
+    dayDate.setDate(dayDate.getDate() + di);
+    const dateStr = dayDate.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    return `<div class="day-editor">
+      <div class="day-editor-header" onclick="toggleDay(${di})">
+        <span>${day} <span style="font-weight:300;color:var(--ink-muted);font-size:13px;">${dateStr}</span></span>
+        <span style="color:var(--ink-muted);font-size:13px;" id="daychev-${di}">▾</span>
+      </div>
+      <div class="day-editor-body" id="daybody-${di}">
+        ${MEALS.map((type, mi) => {
+          const m = saved[di]?.[mi] || { type, name: '', desc: '' };
+          
+          let options = `<option value="">-- No Meal Assigned --</option>`;
+          let foundInCatalog = false;
+          
+          catalog.forEach(c => {
+            const isSelected = m.name === c.name ? 'selected' : '';
+            if(isSelected) foundInCatalog = true;
+            options += `<option value="${c.name.replace(/"/g, '&quot;')}" ${isSelected}>${c.name}</option>`;
+          });
+          
+          if (m.name && !foundInCatalog) {
+             options += `<option value="${m.name.replace(/"/g, '&quot;')}" selected>${m.name} (Legacy Item)</option>`;
+          }
+
+          return `<div class="meal-row">
+            <div class="meal-row-type">${type}</div>
+            <div class="meal-row-fields">
+              <select class="inline-input" id="meal-${di}-${mi}-name" onchange="handleItemSelect(${di}, ${mi}, this.value)">
+                ${options}
+              </select>
+              <input class="inline-input" id="meal-${di}-${mi}-desc" placeholder="Description (optional)" value="${m.desc||''}" />
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  wrap.dataset.weekKey = weekKey;
+}
+
+function handleItemSelect(di, mi, val) {
+  if(!val) return;
+  const cat = getCatalog();
+  const item = cat.find(c => c.name === val);
+  if(item && item.desc) {
+    const descInput = document.getElementById(`meal-${di}-${mi}-desc`);
+    if(!descInput.value.trim()) {
+      descInput.value = item.desc;
+    }
+  }
+}
+
+function toggleDay(di) {
+  const body = document.getElementById('daybody-'+di);
+  const chev = document.getElementById('daychev-'+di);
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? 'flex' : 'none';
+  chev.textContent = hidden ? '▾' : '▸';
+}
+
+function saveWeekMeals() {
+  const weekKey = document.getElementById('dayEditors').dataset.weekKey;
+  if (!weekKey) return;
+  const meals = DAYS.map((_, di) =>
+    MEALS.map((type, mi) => ({
+      type,
+      name: document.getElementById(`meal-${di}-${mi}-name`)?.value?.trim() || '',
+      desc: document.getElementById(`meal-${di}-${mi}-desc`)?.value?.trim() || '',
+    }))
+  );
+  setMeals(weekKey, meals);
+  const msg = document.getElementById('saveMsg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  showToast('Menu saved to cloud!');
+}
+
+function renderLeaderboard(filter, btn) {
+  document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const store = getItemStore();
+  const allMeals = Object.values(store)
+    .filter(v => v.ratings && v.ratings.length > 0)
+    .filter(v => filter === 'all' || v.type === filter)
+    .map(v => {
+      const avg = v.ratings.reduce((a,b)=>a+b,0) / v.ratings.length;
+      return { name: v.name, type: v.type, avg, count: v.ratings.length };
+    })
+    .sort((a,b) => b.avg - a.avg || b.count - a.count);
+
+  const starSvg = `<svg viewBox="0 0 12 12"><path d="M6 1l1.3 2.6L10 4l-2 1.9.5 2.7L6 7.4l-2.5 1.2.5-2.7L2 4l2.7-.4z"/></svg>`;
+  const tbody = document.getElementById('lbBody');
+
+  if (allMeals.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;">No rated meals yet. Add a menu and collect ratings!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = allMeals.map((m, i) => `
+    <tr>
+      <td class="lb-rank ${i<3?'top':''}">${i+1}</td>
+      <td>
+        <div class="lb-meal-name">${m.name}</div>
+        <div class="lb-meal-meta">${m.type}</div>
+      </td>
+      <td><div class="lb-avg">${starSvg}${m.avg.toFixed(1)}</div></td>
+      <td class="lb-count">${m.count}</td>
+    </tr>`).join('');
+}
+
+function changePassword() {
+  const cur = document.getElementById('curPass').value;
+  const nw = document.getElementById('newPass').value;
+  const conf = document.getElementById('confPass').value;
+  const msg = document.getElementById('passMsg');
+  if (cur !== getPassword()) { msg.textContent = 'Current password is incorrect.'; return; }
+  if (nw.length < 4) { msg.textContent = 'New password must be at least 4 characters.'; return; }
+  if (nw !== conf) { msg.textContent = 'Passwords do not match.'; return; }
+  setPassword(nw);
+  msg.style.color = 'var(--sage)';
+  msg.textContent = '✓ Password updated!';
+  document.getElementById('curPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confPass').value = '';
+  setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 3000);
+}
+
+function clearRatings() {
+  if (!confirm('Are you sure? This will delete all collected ratings from the cloud permanently.')) return;
+  db.ref('ratings').remove();
+  localStorage.removeItem('chefMyRatings');
+  showToast('All cloud ratings cleared.');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════════
+//  INITIAL CLOUD SEEDING (Only runs if DB is empty)
+// ══════════════════════════════════════════
+function seedIfEmptyFirebase() {
+  const weekKey = currentWeekKey();
+  const sample = [
+    [['Avocado Toast & Eggs','Multigrain toast, smashed avocado, poached eggs'],['Grilled Chicken Salad','Mixed greens, cherry tomatoes, lemon vinaigrette'],['Beef Stir-Fry','Tenderloin, bok choy, jasmine rice']],
+    [['Greek Yogurt Parfait','Honey, granola, fresh berries'],['Turkey & Avocado Wrap','Whole wheat tortilla, swiss, spinach'],['Salmon & Roasted Veg','Atlantic salmon, asparagus, lemon butter']],
+    [['Oatmeal & Fruit Bowl','Steel-cut oats, banana, walnuts, maple syrup'],['Tomato Basil Soup','Roasted tomato, fresh basil, garlic bread'],['Pasta Primavera','Penne, seasonal vegetables, parmesan']],
+    [['Veggie Omelette','Spinach, mushroom, feta, whole wheat toast'],['Quinoa Power Bowl','Roasted chickpeas, cucumber, tahini'],['Pork Tenderloin','Apple glaze, mashed sweet potato, green beans']],
+    [['Banana Pancakes','Fluffy stacks, maple syrup, fresh fruit'],['Caesar Salad & Shrimp','Romaine, croutons, parmesan, grilled shrimp'],['Fish Tacos','Crispy cod, slaw, chipotle aioli, corn tortillas']],
+  ];
+
+  const meals = sample.map(day => MEALS.map((type, i) => ({ type, name: day[i][0], desc: day[i][1] })));
+  db.ref('weeks/' + weekKey).set(meals);
+
+  const cat = [];
+  sample.forEach(day => day.forEach(meal => { if(!cat.find(c => c.name === meal[0])) cat.push({ name: meal[0], desc: meal[1] }); }));
+  db.ref('catalog').set(cat);
+
+  const demoRatings = {
+    'Avocado Toast & Eggs':    { type: 'Breakfast', ratings: [4,5,5,4] },
+    'Grilled Chicken Salad':   { type: 'Lunch',     ratings: [3,4,5]   },
+    'Beef Stir-Fry':           { type: 'Dinner',    ratings: [5,5,4,5] },
+    'Pasta Primavera':         { type: 'Dinner',    ratings: [4,4,5,3] },
+    'Fish Tacos':              { type: 'Dinner',    ratings: [5,5,5,4] },
+  };
+  
+  const formattedRatings = {};
+  Object.entries(demoRatings).forEach(([name, v]) => {
+    formattedRatings[mealKey(name)] = { name, type: v.type, ratings: v.ratings };
+  });
+  
+  db.ref('ratings').set(formattedRatings);
+  db.ref('password').set('chef1234');
+}
+
+// UI initially renders waiting for Firebase (see empty state inside 'mealsContainer')
+</script>
+</body>
+</html>
