@@ -168,6 +168,46 @@
     background: var(--sage-light); border-radius: 6px; padding: 4px 10px;
   }
 
+  /* ── COMMENTS SECTION ── */
+  .comment-toggle {
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-radius: 8px; transition: all 0.2s;
+  }
+  .comment-toggle:hover { background: var(--sage-light); color: var(--sage); }
+
+  .comment-drawer {
+    display: none; margin-top: 1rem; padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+  }
+  .comment-drawer.active { display: block; }
+
+  .comment-list { max-height: 180px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px; }
+  .comment-list::-webkit-scrollbar { width: 4px; }
+  .comment-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+  .comment-item {
+    font-size: 12px; background: var(--cream);
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 8px;
+    color: var(--ink-light); line-height: 1.4;
+  }
+  .comment-date { font-size: 9px; color: var(--ink-muted); display: block; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .comment-input-row { display: flex; gap: 8px; margin-top: 10px; }
+  .comment-input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border-strong);
+    border-radius: 10px; font-size: 13px; font-family: inherit; outline: none;
+    background: var(--warm-white); transition: border-color 0.2s;
+  }
+  .comment-input:focus { border-color: var(--gold); }
+  .send-btn {
+    background: var(--ink); color: white; border: none;
+    border-radius: 10px; width: 40px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; font-size: 16px; transition: opacity 0.2s;
+  }
+  .send-btn:hover { opacity: 0.9; }
+
   /* ── EMPTY STATE ── */
   .empty-state {
     text-align: center; padding: 4rem 2rem;
@@ -420,17 +460,10 @@
       <div class="qr-url" id="qrUrlDisplay" style="display:none"></div>
       <button class="dl-btn" id="dlBtn" style="display:none" onclick="downloadQR()">Download QR Code</button>
     </div>
-    <div style="font-size:13px; color:var(--ink-muted); text-align:center; line-height:1.8;">
-      <strong>How to deploy this file:</strong><br>
-      Upload this file to any static host<br>
-      (Netlify, GitHub Pages, Vercel — all free).<br>
-      Then paste that URL above to generate your QR code.
-    </div>
   </div>
 </div>
 
 <div id="view-admin" class="view">
-
   <div id="adminLogin">
     <div class="login-box">
       <h2>Admin Access</h2>
@@ -441,7 +474,6 @@
       </div>
       <button class="primary-btn" onclick="adminLogin()">Sign In</button>
       <div class="err-msg" id="loginErr"></div>
-      <p style="font-size:11px;color:var(--ink-muted);margin-top:12px;">Default password: <code>chef1234</code> — change in settings</p>
     </div>
   </div>
 
@@ -465,9 +497,6 @@
           <input type="date" id="weekStartInput" />
           <button class="nav-btn" onclick="loadEditorWeek()">Load</button>
         </div>
-        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">
-          Select an item from your catalog to assign it to the menu. <br>Need a new dish? Add it in the <strong>Items</strong> tab first.
-        </p>
         <div id="dayEditors"></div>
         <div style="display:flex;align-items:center;margin-top:1.5rem;">
           <button class="save-week-btn" onclick="saveWeekMeals()">Save this week's menu</button>
@@ -478,20 +507,14 @@
       <div id="tab-items" style="display:none">
         <div class="section-card" style="padding:1.5rem; margin-bottom:1.5rem;">
           <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;">Add New Item</h3>
-          <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">Create dishes here so you can assign them to the weekly menu. Ratings carry over when the same item is used again!</p>
           <div class="field"><label>Item Name</label><input type="text" id="newItemName" placeholder="e.g. Lemon Pepper Wings" /></div>
-          <div class="field"><label>Default Description</label><input type="text" id="newItemDesc" placeholder="e.g. Served with celery and blue cheese" /></div>
+          <div class="field"><label>Default Description</label><input type="text" id="newItemDesc" placeholder="e.g. Served with celery" /></div>
           <button class="primary-btn" style="width:auto;padding:10px 24px;" onclick="createCatalogItem()">Add to Catalog</button>
         </div>
-        
         <div class="section-card">
           <table class="lb-table">
             <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Description</th>
-                <th>Action</th>
-              </tr>
+              <tr><th>Item Name</th><th>Description</th><th>Action</th></tr>
             </thead>
             <tbody id="catalogBody"></tbody>
           </table>
@@ -500,7 +523,7 @@
 
       <div id="tab-leaderboard" style="display:none">
         <div class="lb-filters">
-          <button class="lb-filter active" onclick="renderLeaderboard('all',this)">All meals</button>
+          <button class="lb-filter active" onclick="renderLeaderboard('all',this)">All</button>
           <button class="lb-filter" onclick="renderLeaderboard('Breakfast',this)">Breakfast</button>
           <button class="lb-filter" onclick="renderLeaderboard('Lunch',this)">Lunch</button>
           <button class="lb-filter" onclick="renderLeaderboard('Dinner',this)">Dinner</button>
@@ -508,12 +531,7 @@
         <div class="section-card">
           <table class="lb-table">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Meal</th>
-                <th>Avg</th>
-                <th>Ratings</th>
-              </tr>
+              <tr><th>#</th><th>Meal</th><th>Avg</th><th>Ratings</th></tr>
             </thead>
             <tbody id="lbBody"></tbody>
           </table>
@@ -522,17 +540,12 @@
 
       <div id="tab-settings" style="display:none">
         <div class="section-card" style="padding:1.5rem;">
-          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;">Change Password</h3>
-          <div class="field"><label>Current password</label><input type="password" id="curPass" /></div>
-          <div class="field"><label>New password</label><input type="password" id="newPass" /></div>
-          <div class="field"><label>Confirm new password</label><input type="password" id="confPass" /></div>
-          <button class="primary-btn" style="width:auto;padding:10px 24px;" onclick="changePassword()">Update password</button>
+          <h3>Change Password</h3>
+          <div class="field"><label>Current</label><input type="password" id="curPass" /></div>
+          <div class="field"><label>New</label><input type="password" id="newPass" /></div>
+          <div class="field"><label>Confirm</label><input type="password" id="confPass" /></div>
+          <button class="primary-btn" style="width:auto;" onclick="changePassword()">Update</button>
           <div class="err-msg" id="passMsg"></div>
-        </div>
-        <div class="section-card" style="padding:1.5rem;margin-top:1rem;">
-          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:8px;">Reset all ratings</h3>
-          <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">This will permanently delete all collected ratings from the cloud database.</p>
-          <button class="nav-btn" onclick="clearRatings()" style="color:#c0392b;border-color:#c0392b;">Clear all ratings</button>
         </div>
       </div>
     </div>
@@ -545,7 +558,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-// 1. Initialize Firebase with your exact config
 const firebaseConfig = {
   apiKey: "AIzaSyDe7cQPav_8tHeHBFQ2atxmtANf9zxvN2M",
   authDomain: "weekly-menu-5bc28.firebaseapp.com",
@@ -553,8 +565,7 @@ const firebaseConfig = {
   projectId: "weekly-menu-5bc28",
   storageBucket: "weekly-menu-5bc28.firebasestorage.app",
   messagingSenderId: "936530103301",
-  appId: "1:936530103301:web:a74d1fda34ea57ae37a06c",
-  measurementId: "G-FKXEF5K63P"
+  appId: "1:936530103301:web:a74d1fda34ea57ae37a06c"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -563,25 +574,17 @@ const db = firebase.database();
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 const MEALS = ['Breakfast','Lunch','Dinner'];
 
-// We store our database here so the app feels instant
 let cloudData = { weeks: {}, catalog: [], ratings: {}, password: 'chef1234' };
 let initialLoad = true;
 
-// Listen for live updates from the database
 db.ref('/').on('value', (snapshot) => {
   if (snapshot.exists()) {
     cloudData = snapshot.val();
     if (!cloudData.weeks) cloudData.weeks = {};
     if (!cloudData.catalog) cloudData.catalog = [];
     if (!cloudData.ratings) cloudData.ratings = {};
-  } else if (initialLoad) {
-    // If the database is completely empty (first time running), seed it
-    seedIfEmptyFirebase();
   }
-  
   initialLoad = false;
-  
-  // Magic: Auto-refresh the screen if data changes while looking at it!
   if (document.getElementById('view-menu').classList.contains('active')) renderMenu();
   if (adminLoggedIn) {
     if (document.getElementById('tab-editor').style.display === 'block') loadEditorWeek();
@@ -590,474 +593,214 @@ db.ref('/').on('value', (snapshot) => {
   }
 });
 
-
-// ══════════════════════════════════════════
-//  FIREBASE CLOUD DATA LAYER
-// ══════════════════════════════════════════
-function getPassword() { return cloudData.password || 'chef1234'; }
-function setPassword(p) { db.ref('password').set(p); }
-
-function getMonday(date) {
-  const d = new Date(date);
+function mealKey(name) { return name.trim().toLowerCase().replace(/[.#$\[\]]/g, ""); }
+function currentWeekKey() { 
+  const d = new Date();
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + diff);
   return d.toISOString().split('T')[0];
 }
 
-function currentWeekKey() { return getMonday(new Date()); }
-
-function getMeals(weekKey) { return cloudData.weeks[weekKey] || null; }
-function setMeals(weekKey, meals) { db.ref('weeks/' + weekKey).set(meals); }
-
-// ── CATALOG ITEMS STORE ──
-function getCatalog() { return cloudData.catalog || []; }
-function saveCatalog(c) { db.ref('catalog').set(c); }
-function mealKey(name) { return name.trim().toLowerCase(); }
-
-// ── RATINGS STORE ──
-function getItemStore() { return cloudData.ratings || {}; }
-function saveItemStore(s) { db.ref('ratings').set(s); }
-
-function getItemRatings(name) {
-  return cloudData.ratings[mealKey(name)]?.ratings || [];
-}
-
-function addItemRating(name, type, stars) {
-  const k = mealKey(name);
-  const currentItem = cloudData.ratings[k] || { name, type, ratings: [] };
-  let currentRatings = currentItem.ratings || [];
-  currentRatings.push(stars);
-  db.ref('ratings/' + k).set({ name, type, ratings: currentRatings });
-}
-
-function updateItemRating(name, oldStars, newStars) {
-  const k = mealKey(name);
-  if (!cloudData.ratings[k]) { addItemRating(name, '', newStars); return; }
-  let currentRatings = cloudData.ratings[k].ratings || [];
-  const idx = currentRatings.indexOf(oldStars);
-  if (idx !== -1) currentRatings[idx] = newStars;
-  else currentRatings.push(newStars); 
-  db.ref('ratings/' + k + '/ratings').set(currentRatings);
-}
-
-// ── PERSONAL RATINGS (localStorage keeps devices from double-voting) ──
 function getMyRatingStore() {
   try { return JSON.parse(localStorage.getItem('chefMyRatings') || '{}'); } catch { return {}; }
 }
 function getMyRating(name) { return getMyRatingStore()[mealKey(name)] || 0; }
-function setMyRating(name, stars) {
-  const r = getMyRatingStore();
-  r[mealKey(name)] = stars;
-  localStorage.setItem('chefMyRatings', JSON.stringify(r));
+
+function rateMeal(dayIdx, mealIdx, stars) {
+  const weekKey = currentWeekKey();
+  const meal = cloudData.weeks[weekKey][dayIdx][mealIdx];
+  const k = mealKey(meal.name);
+  const myR = getMyRatingStore();
+  const prev = myR[k];
+
+  let ratings = cloudData.ratings[k]?.ratings || [];
+  if (prev) {
+    const idx = ratings.indexOf(prev);
+    if (idx !== -1) ratings[idx] = stars;
+    else ratings.push(stars);
+  } else {
+    ratings.push(stars);
+  }
+
+  db.ref('ratings/' + k).update({ name: meal.name, type: meal.type, ratings: ratings });
+  myR[k] = stars;
+  localStorage.setItem('chefMyRatings', JSON.stringify(myR));
+  showToast('Rating saved!');
 }
 
-// ══════════════════════════════════════════
-//  NAVIGATION & UI (Unchanged)
-// ══════════════════════════════════════════
-const views = ['menu','qr','admin'];
-function showView(v) {
-  views.forEach(id => {
-    document.getElementById('view-'+id).classList.toggle('active', id===v);
-  });
-  document.querySelectorAll('.nav-btn').forEach((b,i) => {
-    if(views[i]) b.classList.toggle('active', views[i]===v);
-  });
-  if (v === 'menu') renderMenu();
-  if (v === 'admin') renderAdminInit();
+function toggleComments(id) {
+  document.getElementById('drawer-' + id).classList.toggle('active');
+}
+
+function postComment(mealName, uiId) {
+  const input = document.getElementById('input-' + uiId);
+  const text = input.value.trim();
+  if (!text) return;
+  const k = mealKey(mealName);
+  db.ref('ratings/' + k + '/comments').push({ text, ts: Date.now() });
+  input.value = '';
+  showToast('Comment added!');
 }
 
 let activeDay = 0;
-let currentMenuWeek = null;
-
-function formatWeekLabel(weekKey) {
-  const start = new Date(weekKey + 'T12:00:00');
-  const end = new Date(start); end.setDate(end.getDate() + 4);
-  const fmt = d => d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-  return `${fmt(start)} – ${fmt(end)}, ${start.getFullYear()}`;
-}
-
 function renderMenu() {
-  currentMenuWeek = currentWeekKey();
-  const meals = getMeals(currentMenuWeek);
-  
-  if(!meals) {
-     document.getElementById('mealsContainer').innerHTML = `<div class="empty-state">
-      <div class="icon">🍽️</div>
-      <h3>No meals this week yet</h3>
-      <p>Check back soon or ask the admin to add this week's menu.</p>
-    </div>`;
-  }
-
-  document.getElementById('hero-week-label').textContent = formatWeekLabel(currentMenuWeek);
+  const weekKey = currentWeekKey();
+  const meals = cloudData.weeks[weekKey];
+  document.getElementById('hero-week-label').textContent = weekKey;
 
   const tabs = document.getElementById('dayTabs');
-  const dayDates = DAYS.map((_, i) => {
-    const d = new Date(currentMenuWeek + 'T12:00:00');
-    d.setDate(d.getDate() + i);
-    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-  });
-  tabs.innerHTML = DAYS.map((day, i) =>
-    `<div class="day-tab ${i===activeDay?'active':''}" onclick="switchDay(${i})">
-      ${day.slice(0,3)} <span class="day-date">${dayDates[i]}</span>
-    </div>`
+  tabs.innerHTML = DAYS.map((day, i) => 
+    `<div class="day-tab ${i===activeDay?'active':''}" onclick="activeDay=${i};renderMenu()">${day.slice(0,3)}</div>`
   ).join('');
 
-  renderDayMeals(meals);
-}
-
-function switchDay(i) {
-  activeDay = i;
-  renderMenu();
-}
-
-function renderDayMeals(meals) {
   const container = document.getElementById('mealsContainer');
-  if (!meals || !meals[activeDay] || !meals[activeDay].some(m => m.name)) {
-    container.innerHTML = `<div class="empty-state">
-      <div class="icon">🍽️</div>
-      <h3>No meals planned</h3>
-      <p>Check back soon — the chef hasn't added ${DAYS[activeDay]}'s menu yet.</p>
-    </div>`;
+  if (!meals || !meals[activeDay]) {
+    container.innerHTML = '<div class="empty-state"><h3>No meals yet</h3></div>';
     return;
   }
 
-  const dayMeals = meals[activeDay];
-  container.innerHTML = dayMeals.map((meal, mealIdx) => {
+  container.innerHTML = meals[activeDay].map((meal, mIdx) => {
     if (!meal.name) return '';
-    const ratings = getItemRatings(meal.name);
-    const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : 0;
-    const myRating = getMyRating(meal.name);
-    const starSvg = `<svg viewBox="0 0 12 12"><path d="M6 1l1.3 2.6L10 4l-2 1.9.5 2.7L6 7.4l-2.5 1.2.5-2.7L2 4l2.7-.4z"/></svg>`;
+    const k = mealKey(meal.name);
+    const rData = cloudData.ratings[k] || {};
+    const ratings = rData.ratings || [];
+    const comments = Object.values(rData.comments || {}).reverse();
+    const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1) : 0;
+    const myR = getMyRating(meal.name);
+    const uiId = `${activeDay}-${mIdx}`;
 
-    return `<div class="meal-section">
-      <div class="meal-time-label">${meal.type}</div>
-      <div class="meal-card">
-        <div class="meal-card-top">
-          <div class="meal-name">${meal.name}</div>
-          ${ratings.length ? `<div class="meal-avg">${starSvg}${avg.toFixed(1)}</div>` : ''}
+    return `
+      <div class="meal-section">
+        <div class="meal-time-label">${meal.type}</div>
+        <div class="meal-card">
+          <div class="meal-card-top">
+            <div class="meal-name">${meal.name}</div>
+            ${ratings.length ? `<div class="meal-avg">★ ${avg}</div>` : ''}
+          </div>
+          <div class="meal-desc">${meal.desc}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="stars-row">
+              ${[1,2,3,4,5].map(s => `<button class="star-btn ${myR>=s?'lit rated':''}" onclick="rateMeal(${activeDay},${mIdx},${s})">★</button>`).join('')}
+            </div>
+            <button class="comment-toggle" onclick="toggleComments('${uiId}')">💬 ${comments.length}</button>
+          </div>
+          <div class="comment-drawer" id="drawer-${uiId}">
+            <div class="comment-list">
+              ${comments.map(c => `<div class="comment-item">${c.text}<span class="comment-date">${new Date(c.ts).toLocaleDateString()}</span></div>`).join('') || '<p style="font-size:11px;color:var(--ink-muted)">No comments yet</p>'}
+            </div>
+            <div class="comment-input-row">
+              <input type="text" class="comment-input" id="input-${uiId}" placeholder="Write a comment..." onkeydown="if(event.key==='Enter')postComment('${meal.name}','${uiId}')">
+              <button class="send-btn" onclick="postComment('${meal.name}','${uiId}')">➔</button>
+            </div>
+          </div>
         </div>
-        ${meal.desc ? `<div class="meal-desc">${meal.desc}</div>` : ''}
-        <div class="stars-row" id="stars-${activeDay}-${mealIdx}">
-          ${[1,2,3,4,5].map(s =>
-            `<button class="star-btn ${myRating>=s?'lit rated':''}" onclick="rateMeal(${activeDay},${mealIdx},${s})" aria-label="${s} star">★</button>`
-          ).join('')}
-          <span class="rating-count">${ratings.length} rating${ratings.length!==1?'s':''}</span>
-        </div>
-        ${myRating ? `<div class="rated-badge">✓ You rated this ${myRating} star${myRating!==1?'s':''}</div>` : ''}
-      </div>
-    </div>`;
+      </div>`;
   }).join('');
 }
 
-function rateMeal(dayIdx, mealIdx, stars) {
-  const meals = getMeals(currentMenuWeek);
-  const meal = meals[dayIdx][mealIdx];
-  const prev = getMyRating(meal.name);
-  if (prev) {
-    updateItemRating(meal.name, prev, stars);
-  } else {
-    addItemRating(meal.name, meal.type, stars);
-  }
-  setMyRating(meal.name, stars);
-  showToast('Rating saved to the cloud!');
-}
-
-let qrInstance = null;
-function generateQR() {
-  const url = document.getElementById('qrUrlInput').value.trim();
-  if (!url) { showToast('Please enter a URL first'); return; }
-  const box = document.getElementById('qrcode');
-  box.innerHTML = '';
-  qrInstance = new QRCode(box, {
-    text: url, width: 220, height: 220,
-    colorDark: '#1A1612', colorLight: '#FFFDF9',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  document.getElementById('qrUrlDisplay').textContent = url;
-  document.getElementById('qrUrlDisplay').style.display = 'block';
-  document.getElementById('dlBtn').style.display = 'block';
-}
-
-function downloadQR() {
-  const canvas = document.querySelector('#qrcode canvas');
-  if (!canvas) { showToast('Generate a QR code first'); return; }
-  const link = document.createElement('a');
-  link.download = 'chef-menu-qr.png';
-  link.href = canvas.toDataURL();
-  link.click();
+// Navigation and Admin Logic
+const views = ['menu','qr','admin'];
+function showView(v) {
+  views.forEach(id => document.getElementById('view-'+id).classList.toggle('active', id===v));
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', views[i]===v));
+  if (v === 'menu') renderMenu();
 }
 
 let adminLoggedIn = false;
-
-function renderAdminInit() {
-  document.getElementById('adminLogin').style.display = adminLoggedIn ? 'none' : 'block';
-  document.getElementById('adminDash').style.display = adminLoggedIn ? 'block' : 'none';
-  if (adminLoggedIn) {
-    document.getElementById('weekStartInput').value = getMonday(new Date());
-    loadEditorWeek();
-  }
-}
-
 function adminLogin() {
-  const pass = document.getElementById('adminPass').value;
-  if (pass === getPassword()) {
+  if (document.getElementById('adminPass').value === (cloudData.password || 'chef1234')) {
     adminLoggedIn = true;
-    document.getElementById('loginErr').textContent = '';
-    document.getElementById('adminPass').value = '';
-    renderAdminInit();
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDash').style.display = 'block';
+    loadEditorWeek();
   } else {
-    document.getElementById('loginErr').textContent = 'Incorrect password.';
+    document.getElementById('loginErr').textContent = 'Wrong password';
   }
 }
 
-function adminLogout() {
-  adminLoggedIn = false;
-  renderAdminInit();
-}
+function adminLogout() { adminLoggedIn = false; showView('admin'); document.getElementById('adminLogin').style.display='block'; document.getElementById('adminDash').style.display='none'; }
 
 function switchAdminTab(name, btn) {
-  ['editor','items','leaderboard','settings'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
-  });
+  ['editor','items','leaderboard','settings'].forEach(t => document.getElementById('tab-'+t).style.display = t===name?'block':'none');
   document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (name === 'leaderboard') renderLeaderboard('all', document.querySelector('.lb-filter'));
-  if (name === 'items') renderCatalog();
-  if (name === 'editor') loadEditorWeek();
-}
-
-function createCatalogItem() {
-  const name = document.getElementById('newItemName').value.trim();
-  const desc = document.getElementById('newItemDesc').value.trim();
-  if(!name) { showToast('Item name is required'); return; }
-  
-  const cat = getCatalog();
-  if(cat.find(c => mealKey(c.name) === mealKey(name))) {
-    showToast('An item with this name already exists'); return;
-  }
-  
-  cat.push({ name, desc });
-  saveCatalog(cat);
-  
-  document.getElementById('newItemName').value = '';
-  document.getElementById('newItemDesc').value = '';
-  showToast('Item added to cloud catalog');
-}
-
-function deleteCatalogItem(name) {
-  if(!confirm('Are you sure you want to remove this item? (Previous menus keep their data)')) return;
-  let cat = getCatalog();
-  cat = cat.filter(c => c.name !== name);
-  saveCatalog(cat);
-}
-
-function renderCatalog() {
-  const tbody = document.getElementById('catalogBody');
-  const cat = getCatalog();
-  if(cat.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;">No items created yet. Add a dish above!</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = cat.map(c => `
-    <tr>
-      <td style="font-weight:500;">${c.name}</td>
-      <td style="color:var(--ink-muted); font-size: 13px;">${c.desc || '—'}</td>
-      <td style="text-align:right;">
-        <button class="nav-btn" style="padding:4px 8px;font-size:11px;" onclick="deleteCatalogItem('${c.name.replace(/'/g, "\\'")}')">Remove</button>
-      </td>
-    </tr>
-  `).join('');
 }
 
 function loadEditorWeek() {
-  const weekKey = getMonday(new Date(document.getElementById('weekStartInput').value + 'T12:00:00'));
-  const saved = getMeals(weekKey) || DAYS.map(() => MEALS.map(t => ({ type: t, name: '', desc: '' })));
-  const catalog = getCatalog();
+  const input = document.getElementById('weekStartInput');
+  if(!input.value) input.value = currentWeekKey();
+  const weekKey = input.value;
+  const saved = cloudData.weeks[weekKey] || DAYS.map(() => MEALS.map(t => ({ type: t, name: '', desc: '' })));
   
-  const wrap = document.getElementById('dayEditors');
-  wrap.innerHTML = DAYS.map((day, di) => {
-    const dayDate = new Date(weekKey + 'T12:00:00');
-    dayDate.setDate(dayDate.getDate() + di);
-    const dateStr = dayDate.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-    return `<div class="day-editor">
-      <div class="day-editor-header" onclick="toggleDay(${di})">
-        <span>${day} <span style="font-weight:300;color:var(--ink-muted);font-size:13px;">${dateStr}</span></span>
-        <span style="color:var(--ink-muted);font-size:13px;" id="daychev-${di}">▾</span>
-      </div>
-      <div class="day-editor-body" id="daybody-${di}">
+  document.getElementById('dayEditors').innerHTML = DAYS.map((day, di) => `
+    <div class="day-editor">
+      <div class="day-editor-header">${day}</div>
+      <div class="day-editor-body">
         ${MEALS.map((type, mi) => {
-          const m = saved[di]?.[mi] || { type, name: '', desc: '' };
-          
-          let options = `<option value="">-- No Meal Assigned --</option>`;
-          let foundInCatalog = false;
-          
-          catalog.forEach(c => {
-            const isSelected = m.name === c.name ? 'selected' : '';
-            if(isSelected) foundInCatalog = true;
-            options += `<option value="${c.name.replace(/"/g, '&quot;')}" ${isSelected}>${c.name}</option>`;
-          });
-          
-          if (m.name && !foundInCatalog) {
-             options += `<option value="${m.name.replace(/"/g, '&quot;')}" selected>${m.name} (Legacy Item)</option>`;
-          }
-
+          const m = saved[di][mi];
           return `<div class="meal-row">
             <div class="meal-row-type">${type}</div>
             <div class="meal-row-fields">
-              <select class="inline-input" id="meal-${di}-${mi}-name" onchange="handleItemSelect(${di}, ${mi}, this.value)">
-                ${options}
+              <select class="inline-input" id="edit-n-${di}-${mi}">
+                <option value="">-- Select --</option>
+                ${cloudData.catalog.map(c => `<option value="${c.name}" ${m.name===c.name?'selected':''}>${c.name}</option>`).join('')}
               </select>
-              <input class="inline-input" id="meal-${di}-${mi}-desc" placeholder="Description (optional)" value="${m.desc||''}" />
+              <input class="inline-input" id="edit-d-${di}-${mi}" value="${m.desc}" placeholder="Description">
             </div>
           </div>`;
         }).join('')}
       </div>
-    </div>`;
-  }).join('');
-  wrap.dataset.weekKey = weekKey;
-}
-
-function handleItemSelect(di, mi, val) {
-  if(!val) return;
-  const cat = getCatalog();
-  const item = cat.find(c => c.name === val);
-  if(item && item.desc) {
-    const descInput = document.getElementById(`meal-${di}-${mi}-desc`);
-    if(!descInput.value.trim()) {
-      descInput.value = item.desc;
-    }
-  }
-}
-
-function toggleDay(di) {
-  const body = document.getElementById('daybody-'+di);
-  const chev = document.getElementById('daychev-'+di);
-  const hidden = body.style.display === 'none';
-  body.style.display = hidden ? 'flex' : 'none';
-  chev.textContent = hidden ? '▾' : '▸';
+    </div>`).join('');
 }
 
 function saveWeekMeals() {
-  const weekKey = document.getElementById('dayEditors').dataset.weekKey;
-  if (!weekKey) return;
-  const meals = DAYS.map((_, di) =>
-    MEALS.map((type, mi) => ({
-      type,
-      name: document.getElementById(`meal-${di}-${mi}-name`)?.value?.trim() || '',
-      desc: document.getElementById(`meal-${di}-${mi}-desc`)?.value?.trim() || '',
-    }))
-  );
-  setMeals(weekKey, meals);
-  const msg = document.getElementById('saveMsg');
-  msg.style.display = 'inline';
-  setTimeout(() => { msg.style.display = 'none'; }, 2500);
-  showToast('Menu saved to cloud!');
+  const weekKey = document.getElementById('weekStartInput').value;
+  const meals = DAYS.map((_, di) => MEALS.map((type, mi) => ({
+    type,
+    name: document.getElementById(`edit-n-${di}-${mi}`).value,
+    desc: document.getElementById(`edit-d-${di}-${mi}`).value
+  })));
+  db.ref('weeks/' + weekKey).set(meals);
+  showToast('Menu saved!');
+}
+
+function createCatalogItem() {
+  const name = document.getElementById('newItemName').value;
+  const desc = document.getElementById('newItemDesc').value;
+  if(!name) return;
+  const cat = cloudData.catalog || [];
+  cat.push({name, desc});
+  db.ref('catalog').set(cat);
+  document.getElementById('newItemName').value = '';
+  showToast('Added!');
+}
+
+function renderCatalog() {
+  document.getElementById('catalogBody').innerHTML = (cloudData.catalog || []).map(c => `<tr><td>${c.name}</td><td>${c.desc}</td><td><button onclick="db.ref('catalog').set(cloudData.catalog.filter(i=>i.name!=='${c.name}'))">X</button></td></tr>`).join('');
 }
 
 function renderLeaderboard(filter, btn) {
   document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-
-  const store = getItemStore();
-  const allMeals = Object.values(store)
-    .filter(v => v.ratings && v.ratings.length > 0)
-    .filter(v => filter === 'all' || v.type === filter)
-    .map(v => {
-      const avg = v.ratings.reduce((a,b)=>a+b,0) / v.ratings.length;
-      return { name: v.name, type: v.type, avg, count: v.ratings.length };
-    })
-    .sort((a,b) => b.avg - a.avg || b.count - a.count);
-
-  const starSvg = `<svg viewBox="0 0 12 12"><path d="M6 1l1.3 2.6L10 4l-2 1.9.5 2.7L6 7.4l-2.5 1.2.5-2.7L2 4l2.7-.4z"/></svg>`;
-  const tbody = document.getElementById('lbBody');
-
-  if (allMeals.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;">No rated meals yet. Add a menu and collect ratings!</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = allMeals.map((m, i) => `
-    <tr>
-      <td class="lb-rank ${i<3?'top':''}">${i+1}</td>
-      <td>
-        <div class="lb-meal-name">${m.name}</div>
-        <div class="lb-meal-meta">${m.type}</div>
-      </td>
-      <td><div class="lb-avg">${starSvg}${m.avg.toFixed(1)}</div></td>
-      <td class="lb-count">${m.count}</td>
-    </tr>`).join('');
-}
-
-function changePassword() {
-  const cur = document.getElementById('curPass').value;
-  const nw = document.getElementById('newPass').value;
-  const conf = document.getElementById('confPass').value;
-  const msg = document.getElementById('passMsg');
-  if (cur !== getPassword()) { msg.textContent = 'Current password is incorrect.'; return; }
-  if (nw.length < 4) { msg.textContent = 'New password must be at least 4 characters.'; return; }
-  if (nw !== conf) { msg.textContent = 'Passwords do not match.'; return; }
-  setPassword(nw);
-  msg.style.color = 'var(--sage)';
-  msg.textContent = '✓ Password updated!';
-  document.getElementById('curPass').value = '';
-  document.getElementById('newPass').value = '';
-  document.getElementById('confPass').value = '';
-  setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 3000);
-}
-
-function clearRatings() {
-  if (!confirm('Are you sure? This will delete all collected ratings from the cloud permanently.')) return;
-  db.ref('ratings').remove();
-  localStorage.removeItem('chefMyRatings');
-  showToast('All cloud ratings cleared.');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-// ══════════════════════════════════════════
-//  INITIAL CLOUD SEEDING (Only runs if DB is empty)
-// ══════════════════════════════════════════
-function seedIfEmptyFirebase() {
-  const weekKey = currentWeekKey();
-  const sample = [
-    [['Avocado Toast & Eggs','Multigrain toast, smashed avocado, poached eggs'],['Grilled Chicken Salad','Mixed greens, cherry tomatoes, lemon vinaigrette'],['Beef Stir-Fry','Tenderloin, bok choy, jasmine rice']],
-    [['Greek Yogurt Parfait','Honey, granola, fresh berries'],['Turkey & Avocado Wrap','Whole wheat tortilla, swiss, spinach'],['Salmon & Roasted Veg','Atlantic salmon, asparagus, lemon butter']],
-    [['Oatmeal & Fruit Bowl','Steel-cut oats, banana, walnuts, maple syrup'],['Tomato Basil Soup','Roasted tomato, fresh basil, garlic bread'],['Pasta Primavera','Penne, seasonal vegetables, parmesan']],
-    [['Veggie Omelette','Spinach, mushroom, feta, whole wheat toast'],['Quinoa Power Bowl','Roasted chickpeas, cucumber, tahini'],['Pork Tenderloin','Apple glaze, mashed sweet potato, green beans']],
-    [['Banana Pancakes','Fluffy stacks, maple syrup, fresh fruit'],['Caesar Salad & Shrimp','Romaine, croutons, parmesan, grilled shrimp'],['Fish Tacos','Crispy cod, slaw, chipotle aioli, corn tortillas']],
-  ];
-
-  const meals = sample.map(day => MEALS.map((type, i) => ({ type, name: day[i][0], desc: day[i][1] })));
-  db.ref('weeks/' + weekKey).set(meals);
-
-  const cat = [];
-  sample.forEach(day => day.forEach(meal => { if(!cat.find(c => c.name === meal[0])) cat.push({ name: meal[0], desc: meal[1] }); }));
-  db.ref('catalog').set(cat);
-
-  const demoRatings = {
-    'Avocado Toast & Eggs':    { type: 'Breakfast', ratings: [4,5,5,4] },
-    'Grilled Chicken Salad':   { type: 'Lunch',     ratings: [3,4,5]   },
-    'Beef Stir-Fry':           { type: 'Dinner',    ratings: [5,5,4,5] },
-    'Pasta Primavera':         { type: 'Dinner',    ratings: [4,4,5,3] },
-    'Fish Tacos':              { type: 'Dinner',    ratings: [5,5,5,4] },
-  };
+  btn.classList.add('active');
+  const items = Object.values(cloudData.ratings || {})
+    .filter(i => filter === 'all' || i.type === filter)
+    .sort((a,b) => (b.ratings?.length || 0) - (a.ratings?.length || 0));
   
-  const formattedRatings = {};
-  Object.entries(demoRatings).forEach(([name, v]) => {
-    formattedRatings[mealKey(name)] = { name, type: v.type, ratings: v.ratings };
-  });
-  
-  db.ref('ratings').set(formattedRatings);
-  db.ref('password').set('chef1234');
+  document.getElementById('lbBody').innerHTML = items.map((m, i) => {
+    const avg = m.ratings ? (m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length).toFixed(1) : 0;
+    return `<tr><td>${i+1}</td><td>${m.name}</td><td>★ ${avg}</td><td>${m.ratings?.length || 0}</td></tr>`
+  }).join('');
 }
 
-// UI initially renders waiting for Firebase (see empty state inside 'mealsContainer')
+function generateQR() {
+  const url = document.getElementById('qrUrlInput').value;
+  if(!url) return;
+  document.getElementById('qrcode').innerHTML = '';
+  new QRCode(document.getElementById('qrcode'), { text: url, width: 200, height: 200 });
+}
+
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 </script>
 </body>
 </html>
