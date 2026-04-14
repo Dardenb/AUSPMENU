@@ -168,7 +168,7 @@
     background: var(--sage-light); border-radius: 6px; padding: 4px 10px;
   }
 
-  /* ── COMMENTS SECTION ── */
+  /* ── COMMENTS SECTION & VOTING ── */
   .comment-toggle {
     background: none; border: none; cursor: pointer;
     font-size: 16px; color: var(--ink-muted);
@@ -183,16 +183,30 @@
   }
   .comment-drawer.active { display: block; }
 
-  .comment-list { max-height: 180px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px; }
+  .comment-list { max-height: 250px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px; }
   .comment-list::-webkit-scrollbar { width: 4px; }
   .comment-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
 
   .comment-item {
-    font-size: 12px; background: var(--cream);
-    padding: 10px 12px; border-radius: 10px; margin-bottom: 8px;
+    font-size: 13px; background: var(--cream);
+    padding: 12px; border-radius: 10px; margin-bottom: 8px;
     color: var(--ink-light); line-height: 1.4;
   }
-  .comment-date { font-size: 9px; color: var(--ink-muted); display: block; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  .comment-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px;
+  }
+  .comment-date { font-size: 9px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  .comment-actions { display: flex; gap: 6px; align-items: center; }
+  .vote-btn {
+    background: var(--warm-white); border: 1px solid var(--border-strong);
+    border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+    color: var(--ink-muted); display: flex; align-items: center; gap: 4px; transition: all 0.15s;
+  }
+  .vote-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .vote-count { font-weight: 700; color: var(--ink); font-size: 12px; }
 
   .comment-input-row { display: flex; gap: 8px; margin-top: 10px; }
   .comment-input {
@@ -421,6 +435,7 @@
   <div class="nav-logo">Chef<span>'s</span> Table</div>
   <div class="nav-links">
     <button class="nav-btn active" onclick="showView('menu')">Menu</button>
+    <button class="nav-btn" onclick="showView('leaderboard')">Leaderboard</button>
     <button class="nav-btn" onclick="showView('qr')">QR Code</button>
     <button class="nav-btn" onclick="showView('admin')">Admin</button>
   </div>
@@ -443,6 +458,35 @@
       <div class="icon">🍽️</div>
       <h3>Loading Menu...</h3>
       <p>Fetching the latest data from the cloud.</p>
+    </div>
+  </div>
+</div>
+
+<div id="view-leaderboard" class="view">
+  <div class="meals-wrapper">
+    <div class="hero" style="border-radius: 20px; margin-bottom: 1.5rem; padding: 2.5rem 1.5rem;">
+      <div class="hero-eyebrow">Hall of Fame</div>
+      <h1>Top Rated<br>Dishes</h1>
+    </div>
+    
+    <div class="lb-filters">
+      <button class="lb-filter active" onclick="renderLeaderboard('all',this)">All meals</button>
+      <button class="lb-filter" onclick="renderLeaderboard('Breakfast',this)">Breakfast</button>
+      <button class="lb-filter" onclick="renderLeaderboard('Lunch',this)">Lunch</button>
+      <button class="lb-filter" onclick="renderLeaderboard('Dinner',this)">Dinner</button>
+    </div>
+    <div class="section-card">
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Meal</th>
+            <th>Avg</th>
+            <th>Ratings</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -470,7 +514,6 @@
 </div>
 
 <div id="view-admin" class="view">
-
   <div id="adminLogin">
     <div class="login-box">
       <h2>Admin Access</h2>
@@ -495,7 +538,6 @@
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchAdminTab('editor', this)">Edit Menu</button>
         <button class="admin-tab" onclick="switchAdminTab('items', this)">Items</button>
-        <button class="admin-tab" onclick="switchAdminTab('leaderboard', this)">Leaderboard</button>
         <button class="admin-tab" onclick="switchAdminTab('settings', this)">Settings</button>
       </div>
 
@@ -538,28 +580,6 @@
         </div>
       </div>
 
-      <div id="tab-leaderboard" style="display:none">
-        <div class="lb-filters">
-          <button class="lb-filter active" onclick="renderLeaderboard('all',this)">All meals</button>
-          <button class="lb-filter" onclick="renderLeaderboard('Breakfast',this)">Breakfast</button>
-          <button class="lb-filter" onclick="renderLeaderboard('Lunch',this)">Lunch</button>
-          <button class="lb-filter" onclick="renderLeaderboard('Dinner',this)">Dinner</button>
-        </div>
-        <div class="section-card">
-          <table class="lb-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Meal</th>
-                <th>Avg</th>
-                <th>Ratings</th>
-              </tr>
-            </thead>
-            <tbody id="lbBody"></tbody>
-          </table>
-        </div>
-      </div>
-
       <div id="tab-settings" style="display:none">
         <div class="section-card" style="padding:1.5rem;">
           <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;">Change Password</h3>
@@ -593,8 +613,7 @@ const firebaseConfig = {
   projectId: "weekly-menu-5bc28",
   storageBucket: "weekly-menu-5bc28.firebasestorage.app",
   messagingSenderId: "936530103301",
-  appId: "1:936530103301:web:a74d1fda34ea57ae37a06c",
-  measurementId: "G-FKXEF5K63P"
+  appId: "1:936530103301:web:a74d1fda34ea57ae37a06c"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -605,6 +624,7 @@ const MEALS = ['Breakfast','Lunch','Dinner'];
 
 let cloudData = { weeks: {}, catalog: [], ratings: {}, password: 'chef1234' };
 let initialLoad = true;
+let currentLbFilter = 'all';
 
 db.ref('/').on('value', (snapshot) => {
   if (snapshot.exists()) {
@@ -619,10 +639,11 @@ db.ref('/').on('value', (snapshot) => {
   initialLoad = false;
   
   if (document.getElementById('view-menu').classList.contains('active')) renderMenu();
+  if (document.getElementById('view-leaderboard').classList.contains('active')) renderLeaderboard(currentLbFilter);
+  
   if (adminLoggedIn) {
     if (document.getElementById('tab-editor').style.display === 'block') loadEditorWeek();
     if (document.getElementById('tab-items').style.display === 'block') renderCatalog();
-    if (document.getElementById('tab-leaderboard').style.display === 'block') renderLeaderboard('all', document.querySelector('.lb-filter.active'));
   }
 });
 
@@ -687,7 +708,7 @@ function setMyRating(name, stars) {
 }
 
 // ══════════════════════════════════════════
-//  COMMENTS LOGIC
+//  COMMENTS & VOTING LOGIC
 // ══════════════════════════════════════════
 function toggleComments(id) {
   const drawer = document.getElementById('drawer-' + id);
@@ -702,7 +723,8 @@ function postComment(mealName, uiId) {
   const k = mealKey(mealName);
   const commentData = {
     text: text,
-    ts: Date.now()
+    ts: Date.now(),
+    votes: 0
   };
 
   db.ref('ratings/' + k + '/comments').push(commentData)
@@ -713,18 +735,36 @@ function postComment(mealName, uiId) {
     .catch(() => showToast('Error posting comment.'));
 }
 
+function voteComment(mealName, commentId, change) {
+  // Prevent spam clicking votes using localStorage
+  let voted = JSON.parse(localStorage.getItem('chefVotedComments') || '[]');
+  if(voted.includes(commentId)) {
+     showToast('You already voted on this comment');
+     return;
+  }
+  voted.push(commentId);
+  localStorage.setItem('chefVotedComments', JSON.stringify(voted));
+  
+  const k = mealKey(mealName);
+  const ref = db.ref(`ratings/${k}/comments/${commentId}/votes`);
+  ref.transaction((currentVotes) => {
+    return (currentVotes || 0) + change;
+  });
+}
+
 // ══════════════════════════════════════════
 //  NAVIGATION & UI
 // ══════════════════════════════════════════
-const views = ['menu','qr','admin'];
+const views = ['menu', 'leaderboard', 'qr', 'admin'];
 function showView(v) {
   views.forEach(id => {
     document.getElementById('view-'+id).classList.toggle('active', id===v);
   });
-  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+  document.querySelectorAll('.top-nav .nav-btn').forEach((b,i) => {
     if(views[i]) b.classList.toggle('active', views[i]===v);
   });
   if (v === 'menu') renderMenu();
+  if (v === 'leaderboard') renderLeaderboard(currentLbFilter, document.querySelector('.lb-filter.active'));
   if (v === 'admin') renderAdminInit();
 }
 
@@ -792,7 +832,11 @@ function renderDayMeals(meals) {
     const itemData = cloudData.ratings?.[k] || {};
     const ratings = itemData.ratings || [];
     const comments = itemData.comments || {};
-    const commentList = Object.values(comments).reverse(); // Newest first
+    
+    // Convert to array and sort by votes first, then timestamp
+    const commentList = Object.entries(comments)
+      .map(([id, c]) => ({ id, ...c }))
+      .sort((a,b) => (b.votes || 0) - (a.votes || 0) || b.ts - a.ts);
 
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : 0;
     const myRating = getMyRating(meal.name);
@@ -825,7 +869,13 @@ function renderDayMeals(meals) {
             ${commentList.map(c => `
               <div class="comment-item">
                 ${c.text}
-                <span class="comment-date">${new Date(c.ts).toLocaleDateString()}</span>
+                <div class="comment-meta">
+                  <span class="comment-date">${new Date(c.ts).toLocaleDateString()}</span>
+                  <div class="comment-actions">
+                    <button class="vote-btn" onclick="voteComment('${meal.name.replace(/'/g, "\\'")}', '${c.id}', 1)">▲ <span class="vote-count">${c.votes || 0}</span></button>
+                    <button class="vote-btn" onclick="voteComment('${meal.name.replace(/'/g, "\\'")}', '${c.id}', -1)">▼</button>
+                  </div>
+                </div>
               </div>
             `).join('') || '<p style="font-size:11px; color:var(--ink-muted); text-align:center;">No comments yet.</p>'}
           </div>
@@ -908,12 +958,11 @@ function adminLogout() {
 }
 
 function switchAdminTab(name, btn) {
-  ['editor','items','leaderboard','settings'].forEach(t => {
+  ['editor','items','settings'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name?'block':'none';
   });
   document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (name === 'leaderboard') renderLeaderboard('all', document.querySelector('.lb-filter'));
   if (name === 'items') renderCatalog();
   if (name === 'editor') loadEditorWeek();
 }
@@ -1047,13 +1096,16 @@ function saveWeekMeals() {
 }
 
 function renderLeaderboard(filter, btn) {
-  document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  currentLbFilter = filter || currentLbFilter;
+  if (btn) {
+    document.querySelectorAll('#view-leaderboard .lb-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
 
   const store = getItemStore();
   const allMeals = Object.values(store)
     .filter(v => v.ratings && v.ratings.length > 0)
-    .filter(v => filter === 'all' || v.type === filter)
+    .filter(v => currentLbFilter === 'all' || v.type === currentLbFilter)
     .map(v => {
       const avg = v.ratings.reduce((a,b)=>a+b,0) / v.ratings.length;
       return { name: v.name, type: v.type, avg, count: v.ratings.length };
@@ -1101,6 +1153,7 @@ function clearRatings() {
   if (!confirm('Are you sure? This will delete all collected ratings from the cloud permanently.')) return;
   db.ref('ratings').remove();
   localStorage.removeItem('chefMyRatings');
+  localStorage.removeItem('chefVotedComments');
   showToast('All cloud ratings cleared.');
 }
 
