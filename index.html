@@ -277,7 +277,7 @@
     margin-top: 1rem;
   }
 
-  /* ── ADMIN VIEW ── */
+  /* ── ADMIN VIEW & LEADERBOARD ── */
   .admin-wrap { max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
   .admin-header {
@@ -679,12 +679,18 @@ function getItemRatings(name) {
   return cloudData.ratings[mealKey(name)]?.ratings || [];
 }
 
+// FIX: Changed .set() to .update() so we don't accidentally overwrite/delete comments
 function addItemRating(name, type, stars) {
   const k = mealKey(name);
   const currentItem = cloudData.ratings[k] || { name, type, ratings: [] };
   let currentRatings = currentItem.ratings || [];
   currentRatings.push(stars);
-  db.ref('ratings/' + k).set({ name, type, ratings: currentRatings });
+  
+  db.ref('ratings/' + k).update({ 
+    name: name, 
+    type: type, 
+    ratings: currentRatings 
+  });
 }
 
 function updateItemRating(name, oldStars, newStars) {
@@ -694,6 +700,7 @@ function updateItemRating(name, oldStars, newStars) {
   const idx = currentRatings.indexOf(oldStars);
   if (idx !== -1) currentRatings[idx] = newStars;
   else currentRatings.push(newStars); 
+  
   db.ref('ratings/' + k + '/ratings').set(currentRatings);
 }
 
