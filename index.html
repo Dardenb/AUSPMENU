@@ -62,203 +62,69 @@
     font-family: 'DM Sans', sans-serif; font-size: 13px;
     color: var(--ink-light); cursor: pointer; transition: all 0.15s;
   }
-  .nav-btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
-  .nav-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .nav-btn:hover, .nav-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
 
-  /* ── HERO ── */
-  .hero {
-    background: var(--ink);
-    padding: 3rem 1.5rem 2.5rem;
-    text-align: center;
-    position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 120%, rgba(201,146,58,0.25) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-eyebrow {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--gold);
-    margin-bottom: 12px;
-  }
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(28px, 6vw, 42px); font-weight: 700;
-    color: white; line-height: 1.15; margin-bottom: 12px;
-  }
-  .hero p { color: rgba(255,255,255,0.55); font-size: 14px; }
-  .week-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 100px; padding: 8px 16px;
-    font-size: 13px; color: rgba(255,255,255,0.7);
-    margin-top: 1.25rem;
-  }
+  /* ── HERO & DAY TABS ── */
+  .hero { background: var(--ink); padding: 3rem 1.5rem 2.5rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 120%, rgba(201,146,58,0.25) 0%, transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 6vw, 42px); color: white; line-height: 1.15; margin-bottom: 12px; }
+  .week-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 100px; padding: 8px 16px; font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 1.25rem; }
   .week-dot { width: 7px; height: 7px; background: var(--gold); border-radius: 50%; }
 
-  /* ── DAY TABS ── */
-  .day-strip {
-    background: var(--warm-white);
-    border-bottom: 1px solid var(--border);
-    padding: 0 1rem;
-    display: flex; gap: 0; overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .day-strip::-webkit-scrollbar { display: none; }
-  .day-tab {
-    flex-shrink: 0; padding: 14px 18px;
-    font-size: 13px; font-weight: 500;
-    color: var(--ink-muted); cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .day-tab:hover { color: var(--ink); }
+  .day-strip { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1rem; display: flex; overflow-x: auto; scrollbar-width: none; }
+  .day-tab { flex-shrink: 0; padding: 14px 18px; font-size: 13px; font-weight: 500; color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
   .day-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .day-tab .day-date { display: block; font-size: 11px; font-weight: 300; margin-top: 1px; }
 
-  /* ── MEAL CARDS ── */
+  /* ── MEALS & COMMENTS ── */
   .meals-wrapper { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-
   .meal-section { margin-bottom: 1rem; }
-  .meal-time-label {
-    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--ink-muted);
-    margin-bottom: 8px; padding-left: 2px;
-  }
-
-  .meal-card {
-    background: var(--warm-white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.25rem 1.25rem 1rem;
-    transition: box-shadow 0.2s;
-  }
+  .meal-time-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+  .meal-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: box-shadow 0.2s; }
   .meal-card:hover { box-shadow: var(--shadow); }
-
   .meal-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
   .meal-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
-  .meal-avg {
-    display: flex; align-items: center; gap: 5px;
-    background: var(--gold-pale); border-radius: 100px;
-    padding: 3px 10px; font-size: 12px; font-weight: 500; color: var(--gold);
-    flex-shrink: 0; margin-left: 10px;
-  }
-  .meal-avg svg { width: 11px; height: 11px; fill: var(--gold); flex-shrink: 0; }
+  .meal-avg { display: flex; align-items: center; gap: 5px; background: var(--gold-pale); border-radius: 100px; padding: 3px 10px; font-size: 12px; font-weight: 500; color: var(--gold); }
   .meal-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 1rem; }
 
-  .stars-row { display: flex; align-items: center; gap: 4px; }
-  .star-btn {
-    background: none; border: none; cursor: pointer;
-    font-size: 24px; line-height: 1; padding: 2px;
-    color: var(--border-strong); transition: all 0.1s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .star-btn.lit { color: var(--gold-light); }
-  .star-btn.lit.rated { color: var(--gold); }
-  .star-btn:hover { transform: scale(1.2); }
-
-  .rating-count { font-size: 12px; color: var(--ink-muted); margin-left: 8px; }
-
-  /* ── COMMENTS SECTION ── */
-  .comment-toggle {
-    background: none; border: none; cursor: pointer;
-    font-size: 16px; color: var(--ink-muted);
-    display: flex; align-items: center; gap: 6px;
-    padding: 6px 10px; border-radius: 8px; transition: all 0.2s;
-  }
-  .comment-toggle:hover { background: var(--sage-light); color: var(--sage); }
-
-  .comment-drawer {
-    display: none; margin-top: 1rem; padding-top: 1rem;
-    border-top: 1px dashed var(--border);
-  }
+  .comment-toggle { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--ink-muted); padding: 8px 0; }
+  .comment-drawer { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border); }
   .comment-drawer.active { display: block; }
-
-  .comment-list { max-height: 250px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px; }
-  .comment-list::-webkit-scrollbar { width: 4px; }
-  .comment-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
-
-  .comment-item {
-    font-size: 12px; background: var(--cream);
-    padding: 10px 12px; border-radius: 10px; margin-bottom: 8px;
-    color: var(--ink-light); line-height: 1.4;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .comment-footer {
-    display: flex; justify-content: space-between; align-items: center; margin-top: 4px;
-  }
-  .comment-date { font-size: 9px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  
+  .comment-item { background: var(--cream); padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
+  .comment-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .comment-date { font-size: 9px; color: var(--ink-muted); }
   .comment-votes { display: flex; align-items: center; gap: 8px; }
-  .vote-btn {
-    background: none; border: none; cursor: pointer; font-size: 14px; 
-    color: var(--ink-muted); display: flex; align-items: center; gap: 3px;
-    transition: color 0.2s;
-  }
+  .vote-btn { background: none; border: none; cursor: pointer; color: var(--ink-muted); font-size: 14px; }
   .vote-btn:hover { color: var(--gold); }
-  .vote-count { font-weight: 700; min-width: 10px; text-align: center; }
-
   .comment-input-row { display: flex; gap: 8px; margin-top: 10px; }
-  .comment-input {
-    flex: 1; padding: 10px 14px; border: 1px solid var(--border-strong);
-    border-radius: 10px; font-size: 13px; font-family: inherit; outline: none;
-    background: var(--warm-white); transition: border-color 0.2s;
-  }
-  .comment-input:focus { border-color: var(--gold); }
-  .send-btn {
-    background: var(--ink); color: white; border: none;
-    border-radius: 10px; width: 40px; display: flex; align-items: center;
-    justify-content: center; cursor: pointer; font-size: 16px; transition: opacity 0.2s;
-  }
-  .send-btn:hover { opacity: 0.9; }
+  .comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-strong); border-radius: 10px; font-family: inherit; }
 
-  /* ── QR VIEW ── */
-  .qr-section {
-    max-width: 440px; margin: 0 auto;
-    padding: 2rem 1.5rem;
-    text-align: center;
-  }
-  .qr-card {
-    background: var(--warm-white);
-    border: 1px solid var(--border);
-    border-radius: 20px; padding: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  .qr-card h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
-  #qrcode { display: flex; justify-content: center; margin: 1.5rem 0; }
-  .url-input-row { display: flex; gap: 8px; margin-bottom: 1rem; }
-  .url-input {
-    flex: 1; padding: 10px 14px; border: 1px solid var(--border-strong);
-    border-radius: 10px; font-size: 13px; outline: none;
-  }
-  .gen-btn { padding: 10px 18px; background: var(--ink); color: white; border-radius: 10px; cursor: pointer; }
-
-  /* ── ADMIN VIEW ── */
+  /* ── ADMIN UI (RESTORED) ── */
   .admin-wrap { max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-  .login-box { max-width: 360px; margin: 4rem auto; background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; text-align: center; }
-  .field { margin-bottom: 12px; text-align: left; }
-  .field label { display: block; font-size: 12px; color: var(--ink-muted); margin-bottom: 4px; }
-  .field input, .field select { width: 100%; padding: 10px; border: 1px solid var(--border-strong); border-radius: 10px; }
-  .primary-btn { width: 100%; padding: 12px; background: var(--ink); color: white; border: none; border-radius: 12px; cursor: pointer; }
-  .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; }
-  .admin-tab { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border-strong); cursor: pointer; background: none; }
-  .admin-tab.active { background: var(--ink); color: white; }
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .admin-tab { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border-strong); font-size: 13px; font-weight: 500; cursor: pointer; background: none; font-family: inherit; }
+  .admin-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .week-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .week-selector input { padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 10px; outline: none; }
+
+  .day-editor { margin-bottom: 1.5rem; }
+  .day-editor-header { font-weight: 500; font-size: 14px; background: var(--cream); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; border: 1px solid var(--border); }
+  .meal-row { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: start; margin-bottom: 8px; }
+  .meal-row-type { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); padding-top: 10px; }
+  .meal-row-fields { display: flex; flex-direction: column; gap: 6px; }
+  .inline-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--cream); outline: none; }
+  
+  .primary-btn { width: 100%; padding: 12px; background: var(--ink); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .save-week-btn { padding: 12px 24px; background: var(--sage); color: white; border: none; border-radius: 12px; font-weight: 500; cursor: pointer; }
 
   .lb-table { width: 100%; border-collapse: collapse; }
-  .lb-table th, .lb-table td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
-  
+  .lb-table th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--ink-muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .lb-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
   .section-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 
-  /* Toast */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--ink); color: white; border-radius: 100px;
-    padding: 10px 20px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 999;
-  }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: white; border-radius: 100px; padding: 10px 20px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 999; }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -277,10 +143,7 @@
   <div class="hero">
     <div class="hero-eyebrow">This week's offerings</div>
     <h1>Chef's Weekly<br>Menu</h1>
-    <div class="week-badge">
-      <div class="week-dot"></div>
-      <span id="hero-week-label">Loading...</span>
-    </div>
+    <div class="week-badge"><div class="week-dot"></div><span id="hero-week-label">Loading...</span></div>
   </div>
   <div class="day-strip" id="dayTabs"></div>
   <div class="meals-wrapper" id="mealsContainer"></div>
@@ -301,31 +164,50 @@
 
 <div id="view-admin" class="view">
   <div id="adminLogin">
-    <div class="login-box">
-      <h2>Admin Access</h2>
-      <div class="field"><label>Password</label><input type="password" id="adminPass" onkeydown="if(event.key==='Enter')adminLogin()" /></div>
+    <div class="login-box" style="max-width:360px; margin: 4rem auto; background:white; padding:2rem; border-radius:20px; text-align:center; border:1px solid var(--border);">
+      <h2 style="font-family:'Playfair Display',serif; margin-bottom:1rem;">Admin Access</h2>
+      <input type="password" id="adminPass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:1rem; border-radius:10px; border:1px solid var(--border-strong);">
       <button class="primary-btn" onclick="adminLogin()">Sign In</button>
-      <div class="err-msg" id="loginErr"></div>
+      <div id="loginErr" style="color:red; font-size:12px; margin-top:10px;"></div>
     </div>
   </div>
+
   <div id="adminDash" style="display:none">
     <div class="admin-wrap">
-      <div class="admin-header"><h2>Dashboard</h2><button class="nav-btn" onclick="adminLogout()">Sign out</button></div>
+      <div class="admin-header">
+        <h2 style="font-family:'Playfair Display',serif;">Admin Dashboard</h2>
+        <button class="nav-btn" onclick="adminLogout()">Sign out</button>
+      </div>
+
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchAdminTab('editor', this)">Edit Menu</button>
         <button class="admin-tab" onclick="switchAdminTab('items', this)">Items</button>
         <button class="admin-tab" onclick="switchAdminTab('leaderboard', this)">Leaderboard</button>
       </div>
+
       <div id="tab-editor">
-        <div class="week-selector"><input type="date" id="weekStartInput" /><button class="nav-btn" onclick="loadEditorWeek()">Load</button></div>
+        <div class="week-selector">
+          <label style="font-size:13px; font-weight:500;">Week of:</label>
+          <input type="date" id="weekStartInput">
+          <button class="nav-btn" onclick="loadEditorWeek()">Load</button>
+        </div>
         <div id="dayEditors"></div>
-        <button class="primary-btn" onclick="saveWeekMeals()" style="margin-top:20px">Save Menu</button>
+        <div style="margin-top:1.5rem;"><button class="save-week-btn" onclick="saveWeekMeals()">Save Weekly Menu</button></div>
       </div>
+
       <div id="tab-items" style="display:none">
-        <div class="section-card" style="padding:1rem"><input type="text" id="newItemName" placeholder="Name" /><button onclick="createCatalogItem()">Add</button></div>
+        <div class="section-card" style="padding:1.5rem; margin-bottom:1.5rem;">
+          <h3 style="margin-bottom:1rem;">Add New Item</h3>
+          <input type="text" id="newItemName" class="inline-input" placeholder="Item Name" style="margin-bottom:8px;">
+          <input type="text" id="newItemDesc" class="inline-input" placeholder="Default Description" style="margin-bottom:12px;">
+          <button class="primary-btn" style="width:auto; padding:10px 24px;" onclick="createCatalogItem()">Add to Catalog</button>
+        </div>
         <div class="section-card"><table class="lb-table"><tbody id="catalogBody"></tbody></table></div>
       </div>
-      <div id="tab-leaderboard" style="display:none"><div class="section-card"><table class="lb-table"><tbody id="lbBody"></tbody></table></div></div>
+
+      <div id="tab-leaderboard" style="display:none">
+        <div class="section-card"><table class="lb-table"><thead><tr><th>Meal</th><th>Avg</th><th>Ratings</th></tr></thead><tbody id="lbBody"></tbody></table></div>
+      </div>
     </div>
   </div>
 </div>
@@ -362,6 +244,10 @@ db.ref('/').on('value', (snapshot) => {
     if (!cloudData.ratings) cloudData.ratings = {};
   }
   renderMenu();
+  if (adminLoggedIn) {
+    renderCatalog();
+    renderLeaderboard();
+  }
 });
 
 function mealKey(name) { return name ? name.trim().toLowerCase().replace(/[.#$\[\]]/g, "") : "unknown"; }
@@ -373,25 +259,85 @@ function currentWeekKey() {
   return d.toISOString().split('T')[0];
 }
 
+// RESTORED EDITOR LOGIC
+function loadEditorWeek() {
+  const input = document.getElementById('weekStartInput');
+  if(!input.value) input.value = currentWeekKey();
+  const weekKey = input.value;
+  const saved = cloudData.weeks[weekKey] || DAYS.map(() => MEALS.map(t => ({ type: t, name: '', desc: '' })));
+  
+  document.getElementById('dayEditors').innerHTML = DAYS.map((day, di) => `
+    <div class="day-editor">
+      <div class="day-editor-header">${day}</div>
+      <div class="day-editor-body">
+        ${MEALS.map((type, mi) => {
+          const m = saved[di][mi] || { name: '', desc: '' };
+          return `<div class="meal-row">
+            <div class="meal-row-type">${type}</div>
+            <div class="meal-row-fields">
+              <select class="inline-input" id="edit-n-${di}-${mi}">
+                <option value="">-- Select --</option>
+                ${cloudData.catalog.map(c => `<option value="${c.name}" ${m.name===c.name?'selected':''}>${c.name}</option>`).join('')}
+              </select>
+              <input class="inline-input" id="edit-d-${di}-${mi}" value="${m.desc || ''}" placeholder="Description">
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function saveWeekMeals() {
+  const weekKey = document.getElementById('weekStartInput').value;
+  const meals = DAYS.map((_, di) => MEALS.map((type, mi) => ({
+    type,
+    name: document.getElementById(`edit-n-${di}-${mi}`).value,
+    desc: document.getElementById(`edit-d-${di}-${mi}`).value
+  })));
+  db.ref('weeks/' + weekKey).set(meals);
+  showToast('Menu saved!');
+}
+
+function createCatalogItem() {
+  const name = document.getElementById('newItemName').value;
+  const desc = document.getElementById('newItemDesc').value;
+  if(!name) return;
+  const cat = cloudData.catalog || [];
+  cat.push({name, desc});
+  db.ref('catalog').set(cat);
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemDesc').value = '';
+  showToast('Added to catalog!');
+}
+
+function renderCatalog() {
+  document.getElementById('catalogBody').innerHTML = (cloudData.catalog || []).map(c => `<tr><td>${c.name}</td><td><button onclick="deleteCatalogItem('${c.name}')">Delete</button></td></tr>`).join('');
+}
+
+function deleteCatalogItem(name) {
+  const updated = cloudData.catalog.filter(i => i.name !== name);
+  db.ref('catalog').set(updated);
+}
+
+function renderLeaderboard() {
+  const items = Object.values(cloudData.ratings || {}).sort((a,b) => (b.ratings?.length || 0) - (a.ratings?.length || 0));
+  document.getElementById('lbBody').innerHTML = items.map(m => {
+    const avg = m.ratings ? (m.ratings.reduce((a,b)=>a+b,0)/m.ratings.length).toFixed(1) : 0;
+    return `<tr><td>${m.name}</td><td>★ ${avg}</td><td>${m.ratings?.length || 0}</td></tr>`;
+  }).join('');
+}
+
+// COMMENT VOTING & MENU RENDERING
 function voteComment(mealName, commentId, val) {
   const k = mealKey(mealName);
-  const voteRef = db.ref(`ratings/${k}/comments/${commentId}/score`);
-  voteRef.transaction((currentScore) => {
-    return (currentScore || 0) + val;
-  });
-  showToast(val > 0 ? "Upvoted!" : "Downvoted!");
+  db.ref(`ratings/${k}/comments/${commentId}/score`).transaction(s => (s || 0) + val);
 }
 
 function postComment(mealName, uiId) {
   const input = document.getElementById('input-' + uiId);
   const text = input.value.trim();
   if (!text) return;
-  const k = mealKey(mealName);
-  db.ref('ratings/' + k + '/comments').push({ 
-    text, 
-    ts: Date.now(),
-    score: 0 
-  });
+  db.ref('ratings/' + mealKey(mealName) + '/comments').push({ text, ts: Date.now(), score: 0 });
   input.value = '';
 }
 
@@ -399,15 +345,11 @@ function renderMenu() {
   const weekKey = currentWeekKey();
   const meals = cloudData.weeks[weekKey];
   document.getElementById('hero-week-label').textContent = weekKey;
-
-  const tabs = document.getElementById('dayTabs');
-  tabs.innerHTML = DAYS.map((day, i) => `<div class="day-tab ${i===activeDay?'active':''}" onclick="activeDay=${i};renderMenu()">${day.slice(0,3)}</div>`).join('');
+  
+  document.getElementById('dayTabs').innerHTML = DAYS.map((day, i) => `<div class="day-tab ${i===activeDay?'active':''}" onclick="activeDay=${i};renderMenu()">${day.slice(0,3)}</div>`).join('');
 
   const container = document.getElementById('mealsContainer');
-  if (!meals || !meals[activeDay]) {
-    container.innerHTML = '<div class="empty-state"><h3>No meals set for today</h3></div>';
-    return;
-  }
+  if (!meals || !meals[activeDay]) { container.innerHTML = '<div class="empty-state"><h3>No meals set</h3></div>'; return; }
 
   container.innerHTML = meals[activeDay].map((meal, mIdx) => {
     if (!meal.name) return '';
@@ -421,29 +363,22 @@ function renderMenu() {
       <div class="meal-section">
         <div class="meal-time-label">${meal.type}</div>
         <div class="meal-card">
-          <div class="meal-card-top">
-            <div class="meal-name">${meal.name}</div>
-            ${avg > 0 ? `<div class="meal-avg">★ ${avg}</div>` : ''}
-          </div>
+          <div class="meal-card-top"><div class="meal-name">${meal.name}</div>${avg > 0 ? `<div class="meal-avg">★ ${avg}</div>` : ''}</div>
           <div class="meal-desc">${meal.desc}</div>
           <button class="comment-toggle" onclick="toggleComments('${uiId}')">💬 ${comments.length} Comments</button>
-          
           <div class="comment-drawer" id="drawer-${uiId}">
-            <div class="comment-list">
-              ${comments.map(([id, c]) => `
-                <div class="comment-item">
-                  <div>${c.text}</div>
-                  <div class="comment-footer">
-                    <span class="comment-date">${new Date(c.ts).toLocaleDateString()}</span>
-                    <div class="comment-votes">
-                      <button class="vote-btn" onclick="voteComment('${meal.name}', '${id}', 1)">▲</button>
-                      <span class="vote-count">${c.score || 0}</span>
-                      <button class="vote-btn" onclick="voteComment('${meal.name}', '${id}', -1)">▼</button>
-                    </div>
+            <div class="comment-list">${comments.map(([id, c]) => `
+              <div class="comment-item">
+                <div>${c.text}</div>
+                <div class="comment-footer">
+                  <span class="comment-date">${new Date(c.ts).toLocaleDateString()}</span>
+                  <div class="comment-votes">
+                    <button class="vote-btn" onclick="voteComment('${meal.name}', '${id}', 1)">▲</button>
+                    <span style="font-weight:bold; font-size:11px;">${c.score || 0}</span>
+                    <button class="vote-btn" onclick="voteComment('${meal.name}', '${id}', -1)">▼</button>
                   </div>
                 </div>
-              `).join('') || '<p style="font-size:11px">No comments yet</p>'}
-            </div>
+              </div>`).join('')}</div>
             <div class="comment-input-row">
               <input type="text" class="comment-input" id="input-${uiId}" placeholder="Add a comment...">
               <button class="send-btn" onclick="postComment('${meal.name}','${uiId}')">➔</button>
@@ -455,22 +390,32 @@ function renderMenu() {
 }
 
 function toggleComments(id) { document.getElementById('drawer-' + id).classList.toggle('active'); }
-function showView(v) { document.querySelectorAll('.view').forEach(el => el.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); }
+function showView(v) { 
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active')); 
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(v)));
+}
 function generateQR() { 
   const url = document.getElementById('qrUrlInput').value; 
-  if(url) { 
-    document.getElementById('qrcode').innerHTML = ''; 
-    new QRCode(document.getElementById('qrcode'), {text: url, width: 160, height: 160}); 
-  } 
+  if(url) { document.getElementById('qrcode').innerHTML = ''; new QRCode(document.getElementById('qrcode'), {text: url, width: 160, height: 160}); } 
 }
 function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 
-// Admin functions (Simplified for brevity)
 let adminLoggedIn = false;
-function adminLogin() { if(document.getElementById('adminPass').value === cloudData.password) { adminLoggedIn = true; document.getElementById('adminLogin').style.display='none'; document.getElementById('adminDash').style.display='block'; loadEditorWeek(); } }
+function adminLogin() {
+  if(document.getElementById('adminPass').value === (cloudData.password || 'chef1234')) {
+    adminLoggedIn = true;
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminDash').style.display='block';
+    loadEditorWeek();
+  } else { document.getElementById('loginErr').innerText = 'Incorrect Password'; }
+}
 function adminLogout() { adminLoggedIn = false; location.reload(); }
-function switchAdminTab(t, b) { document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); document.getElementById('tab-editor').style.display = t==='editor'?'block':'none'; }
-function loadEditorWeek() { /* Logic for editor */ }
+function switchAdminTab(t, b) { 
+  document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('active')); 
+  b.classList.add('active'); 
+  ['editor','items','leaderboard'].forEach(id => document.getElementById('tab-'+id).style.display = id===t?'block':'none');
+}
 </script>
 </body>
 </html>
