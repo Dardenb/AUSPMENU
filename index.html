@@ -696,7 +696,7 @@
             <h3>Ready to race?</h3>
             <p><strong>← →</strong> (or A / D) to steer, <strong>↑</strong> (or W) for gas. On mobile, use the buttons below the track.</p>
             <p style="font-size:12px;color:rgba(255,255,255,0.6);">Stay on the road — the grass will slow you down. Hit every checkpoint and cross the finish line for your time.</p>
-            <p style="font-size:12px;color:#34d399;margin-top:8px;"><strong>Grab green boosts (>>) for speed, avoid black mud!</strong></p>
+            <p style="font-size:12px;color:#34d399;margin-top:8px;"><strong>Grab green boosts (>>) for speed, avoid black mud, and watch out for cows!</strong></p>
             <button class="primary-btn" style="margin-top:14px;" onclick="startCountdown()">Start Race</button>
           </div>
         </div>
@@ -1389,6 +1389,7 @@ let raceNextCp = 1;
 let raceKeys = { left: false, right: false, gas: false };
 let raceFinalTimeMs = null;
 let raceLastFrameTime = 0;
+let cowState = { active: false, progress: 0, triggered: false };
 
 function todayKey() {
   const d = new Date();
@@ -1439,6 +1440,8 @@ function generateDailyTrack() {
   // Generate pickups (Boosts and Mud/Oil)
   const pickups = [];
   const numPickups = 10 + Math.floor(rng() * 8); // 10 to 17 pickups
+  let mudCount = 0;
+
   for (let i = 0; i < numPickups; i++) {
     // distribute somewhat evenly around track
     const segment = Math.floor(N / numPickups);
@@ -1458,7 +1461,22 @@ function generateDailyTrack() {
     // Offset from center line
     const offsetMag = (rng() * RACE_ROAD_WIDTH * 0.35) * (rng() > 0.5 ? 1 : -1);
 
-    const isBoost = rng() > 0.4; // 60% boost, 40% mud
+    let isBoost = rng() > 0.4; // 60% boost, 40% mud
+    
+    // GUARANTEE NO MUD AT START: Force a boost if the spawn is within the starting or finishing segments
+    if (trackIdx < 15 || trackIdx > N - 10) {
+        isBoost = true;
+    }
+    
+    // GUARANTEE AT LEAST 4 MUDS: If running out of pickups and we haven't met the quota, force mud
+    if (!isBoost) {
+        mudCount++;
+    }
+    if (isBoost && (numPickups - i) <= (4 - mudCount)) {
+        isBoost = false;
+        mudCount++;
+    }
+
     pickups.push({
       x: p.x + nx * offsetMag,
       y: p.y + ny * offsetMag,
@@ -1468,7 +1486,22 @@ function generateDailyTrack() {
     });
   }
 
-  return { points, cps, pickups, day: todayKey() };
+  // Pre-calculate Cow Stampede Path halfway across the track
+  const halfwayIdx = Math.floor(N / 2);
+  const hwP = points[halfwayIdx];
+  const hwNext = points[(halfwayIdx + 1) % N];
+  const hwDx = hwNext.x - hwP.x;
+  const hwDy = hwNext.y - hwP.y;
+  const hwLen = Math.hypot(hwDx, hwDy);
+  
+  const cowStampede = {
+     x: hwP.x,
+     y: hwP.y,
+     dirX: -hwDy / hwLen,
+     dirY: hwDx / hwLen
+  };
+
+  return { points, cps, pickups, cowStampede, day: todayKey() };
 }
 
 function isOnTrack(x, y) {
@@ -1492,6 +1525,7 @@ function resetCarToStart() {
   raceElapsed = 0;
   raceFinalTimeMs = null;
   raceKeys = { left: false, right: false, gas: false };
+  cowState = { active: false, progress: 0, triggered: false };
   
   if (raceTrack && raceTrack.pickups) {
      raceTrack.pickups.forEach(p => p.active = true);
@@ -1553,6 +1587,33 @@ function updateRace(dt) {
         }
       }
     });
+  }
+
+  // Update Cow Stampede Logic
+  if (!cowState.triggered) {
+    const distToHalf = Math.hypot(raceCar.x - raceTrack.cowStampede.x, raceCar.y - raceTrack.cowStampede.y);
+    if (distToHalf < 180) { // Trigger cow when closing in on halfway point
+       cowState.triggered = true;
+       cowState.active = true;
+       cowState.progress = -200; // start 200px to the side
+    }
+  }
+
+  if (cowState.active) {
+    cowState.progress += 200 * dt; // move 200px per second across track
+    const cowHitboxX = raceTrack.cowStampede.x + raceTrack.cowStampede.dirX * cowState.progress;
+    const cowHitboxY = raceTrack.cowStampede.y + raceTrack.cowStampede.dirY * cowState.progress;
+    
+    // Check Cow Collision (Same Hitbox Size as Mud: radius 16)
+    if (Math.hypot(raceCar.x - cowHitboxX, raceCar.y - cowHitboxY) < 16 + 10) {
+       showToast("Hit by a cow stampede! Restarting...");
+       restartRaceNow();
+       return; // Abort further updates for this frame to prevent collision glitches
+    }
+    
+    if (cowState.progress > 200) {
+       cowState.active = false;
+    }
   }
 
   raceCar.speed = Math.max(0, Math.min(currentMaxSpeed, raceCar.speed));
@@ -1635,6 +1696,29 @@ function drawRace() {
         ctx.fill();
       }
     });
+  }
+
+  // Draw Cow Stampede
+  if (cowState.active) {
+    const cx = raceTrack.cowStampede.x + raceTrack.cowStampede.dirX * cowState.progress;
+    const cy = raceTrack.cowStampede.y + raceTrack.cowStampede.dirY * cowState.progress;
+    
+    const drawCow = (x, y) => {
+      ctx.beginPath();
+      ctx.arc(x, y, 16, 0, Math.PI*2);
+      ctx.fillStyle = '#8B4513';
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px "DM Sans"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('COW', x, y);
+    };
+
+    // Draw the main cow hitbox and two trailing cows for stampede effect
+    drawCow(cx, cy);
+    drawCow(cx - raceTrack.cowStampede.dirY * 25, cy + raceTrack.cowStampede.dirX * 25);
+    drawCow(cx + raceTrack.cowStampede.dirY * 25, cy - raceTrack.cowStampede.dirX * 25);
   }
 
   // Draw checkpoints
