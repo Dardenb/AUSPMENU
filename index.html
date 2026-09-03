@@ -423,6 +423,72 @@
   }
   .toast.show { opacity: 1; }
 
+  /* ── GAME POPUP ── */
+  .game-popup-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(26,22,18,0.6);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .game-popup-overlay.show { opacity: 1; pointer-events: auto; }
+  .game-popup-card {
+    background: var(--warm-white); border-radius: 20px;
+    max-width: 380px; width: 100%; padding: 2rem;
+    text-align: center; box-shadow: var(--shadow-lg);
+  }
+  .game-popup-badge {
+    display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold);
+    background: var(--gold-pale); border-radius: 100px; padding: 5px 12px;
+    margin-bottom: 12px;
+  }
+  .game-popup-card h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 8px; }
+  .game-popup-card p { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+  /* ── GAME (SWERVE RACE) ── */
+  .game-overlay {
+    position: absolute; inset: 0; border-radius: 14px;
+    background: rgba(20,17,14,0.74);
+    display: flex; align-items: center; justify-content: center;
+    color: white; text-align: center; padding: 1.5rem;
+  }
+  .game-overlay-inner { max-width: 320px; }
+  .game-overlay-inner h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 10px; }
+  .game-overlay-inner p { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 10px; line-height: 1.6; }
+  .game-overlay-inner .field { margin-bottom: 12px; }
+  .game-overlay-inner .field label { color: rgba(255,255,255,0.7); }
+  .game-overlay-inner .field input {
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); color: white;
+  }
+  .game-countdown-num {
+    font-family: 'Playfair Display', serif; font-size: 96px; font-weight: 700; color: var(--gold-light);
+  }
+  .result-time {
+    font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; color: var(--gold-light);
+  }
+  .game-hud {
+    display: flex; justify-content: space-between; margin-top: 1rem; padding: 0 4px;
+  }
+  .game-hud-item { text-align: center; flex: 1; }
+  .game-hud-label {
+    display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: 2px;
+  }
+  .game-hud-value { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .game-touch-controls { display: none; gap: 10px; justify-content: center; margin-top: 1rem; }
+  .touch-btn {
+    width: 64px; height: 56px; border-radius: 14px; border: 1px solid var(--border-strong);
+    background: var(--cream); color: var(--ink); font-size: 20px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer;
+  }
+  .touch-btn-gas { width: 96px; background: var(--gold); color: white; border-color: var(--gold); font-size: 14px; letter-spacing: 0.05em; }
+  .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  @media (max-width: 720px) {
+    .game-touch-controls { display: flex; }
+  }
+
   /* Responsive */
   @media(max-width: 480px) {
     .meal-row { grid-template-columns: 80px 1fr; }
@@ -438,8 +504,19 @@
     <button class="nav-btn" onclick="showView('leaderboard')">Leaderboard</button>
     <button class="nav-btn" onclick="showView('qr')">QR Code</button>
     <button class="nav-btn" onclick="showView('admin')">Admin</button>
+    <button class="nav-btn" onclick="showView('game')">🏁 Race</button>
   </div>
 </nav>
+
+<div class="game-popup-overlay" id="gamePopupOverlay">
+  <div class="game-popup-card">
+    <div class="game-popup-badge">🏁 Daily Challenge</div>
+    <h2>Today's Swerve Race</h2>
+    <p>A brand new track every day. Pilot your car around the course, post your fastest time, and climb this week's leaderboard.</p>
+    <button class="primary-btn" onclick="playNowFromPopup()">Play Now</button>
+    <button class="nav-btn" style="margin-top:10px;width:100%;" onclick="dismissGamePopup()">Maybe later</button>
+  </div>
+</div>
 
 <div id="view-menu" class="view active">
   <div class="hero">
@@ -599,6 +676,81 @@
   </div>
 </div>
 
+<div id="view-game" class="view">
+  <div class="meals-wrapper" style="max-width:640px;">
+    <div class="hero" style="border-radius: 20px; margin-bottom: 1.5rem; padding: 2.5rem 1.5rem;">
+      <div class="hero-eyebrow">Daily Challenge</div>
+      <h1>Swerve<br>Race</h1>
+      <div class="week-badge">
+        <div class="week-dot"></div>
+        <span id="game-date-label">Loading...</span>
+      </div>
+    </div>
+
+    <div class="section-card" style="padding:1.25rem;">
+      <div id="gameStageWrap" style="position:relative;">
+        <canvas id="raceCanvas" width="600" height="600" style="width:100%;height:auto;display:block;border-radius:14px;background:#3c4d34;touch-action:none;"></canvas>
+
+        <div id="gameStartOverlay" class="game-overlay">
+          <div class="game-overlay-inner">
+            <h3>Ready to race?</h3>
+            <p><strong>← →</strong> (or A / D) to steer, <strong>↑</strong> (or W) for gas. On mobile, use the buttons below the track.</p>
+            <p style="font-size:12px;color:rgba(255,255,255,0.6);">Stay on the road — the grass will slow you down. Hit every checkpoint and cross the finish line for your time.</p>
+            <p style="font-size:12px;color:#34d399;margin-top:8px;"><strong>Grab green boosts (>>) for speed, avoid black mud!</strong></p>
+            <button class="primary-btn" style="margin-top:14px;" onclick="startCountdown()">Start Race</button>
+          </div>
+        </div>
+
+        <div id="gameCountdownOverlay" class="game-overlay" style="display:none;">
+          <div class="game-countdown-num" id="countdownNum">3</div>
+        </div>
+
+        <div id="gameResultOverlay" class="game-overlay" style="display:none;">
+          <div class="game-overlay-inner">
+            <h3 id="resultTitle">Finished!</h3>
+            <div class="result-time" id="resultTime">00:00.0</div>
+            <div id="resultSaveGroup">
+              <div class="field" style="margin-top:14px;">
+                <label>Your name</label>
+                <input type="text" id="racerName" maxlength="20" placeholder="Enter your name" />
+              </div>
+              <button class="primary-btn" onclick="submitRaceScore()">Save Score</button>
+            </div>
+            <button class="nav-btn" style="margin-top:8px;width:100%;" onclick="resetGameView()">Race Again</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-hud">
+        <div class="game-hud-item"><span class="game-hud-label">Time</span><span class="game-hud-value" id="hudTime">00:00.0</span></div>
+        <div class="game-hud-item"><span class="game-hud-label">Checkpoints</span><span class="game-hud-value" id="hudCheckpoints">0 / 0</span></div>
+        <div class="game-hud-item"><span class="game-hud-label">Your Best</span><span class="game-hud-value" id="hudBest">--:--.-</span></div>
+        <div class="game-hud-item" style="display:flex; justify-content:flex-end; align-items:center; padding-left: 10px;">
+            <button class="nav-btn" style="padding: 4px 10px; font-size: 11px; white-space: nowrap; margin-top:12px;" onclick="restartRaceNow()">↻ Restart</button>
+        </div>
+      </div>
+
+      <div class="game-touch-controls" id="gameTouchControls">
+        <button class="touch-btn" id="btnLeft">◀</button>
+        <button class="touch-btn touch-btn-gas" id="btnGas">GAS</button>
+        <button class="touch-btn" id="btnRight">▶</button>
+      </div>
+    </div>
+
+    <div class="section-card" style="margin-top:1.5rem;">
+      <div style="padding:1rem 1.25rem 0;">
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;">This Week's Fastest Times</h3>
+      </div>
+      <table class="lb-table">
+        <thead>
+          <tr><th>#</th><th>Racer</th><th>Time</th><th>Date</th></tr>
+        </thead>
+        <tbody id="gameLbBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -632,6 +784,7 @@ db.ref('/').on('value', (snapshot) => {
     if (!cloudData.weeks) cloudData.weeks = {};
     if (!cloudData.catalog) cloudData.catalog = [];
     if (!cloudData.ratings) cloudData.ratings = {};
+    if (!cloudData.gameScores) cloudData.gameScores = {};
   } else if (initialLoad) {
     seedIfEmptyFirebase();
   }
@@ -640,6 +793,7 @@ db.ref('/').on('value', (snapshot) => {
   
   if (document.getElementById('view-menu').classList.contains('active')) renderMenu();
   if (document.getElementById('view-leaderboard').classList.contains('active')) renderLeaderboard(currentLbFilter);
+  if (document.getElementById('view-game').classList.contains('active')) renderGameLeaderboard();
   
   if (adminLoggedIn) {
     if (document.getElementById('tab-editor').style.display === 'block') loadEditorWeek();
@@ -679,7 +833,6 @@ function getItemRatings(name) {
   return cloudData.ratings[mealKey(name)]?.ratings || [];
 }
 
-// FIX: Changed .set() to .update() so we don't accidentally overwrite/delete comments
 function addItemRating(name, type, stars) {
   const k = mealKey(name);
   const currentItem = cloudData.ratings[k] || { name, type, ratings: [] };
@@ -743,7 +896,6 @@ function postComment(mealName, uiId) {
 }
 
 function voteComment(mealName, commentId, change) {
-  // Prevent spam clicking votes using localStorage
   let voted = JSON.parse(localStorage.getItem('chefVotedComments') || '[]');
   if(voted.includes(commentId)) {
      showToast('You already voted on this comment');
@@ -762,7 +914,7 @@ function voteComment(mealName, commentId, change) {
 // ══════════════════════════════════════════
 //  NAVIGATION & UI
 // ══════════════════════════════════════════
-const views = ['menu', 'leaderboard', 'qr', 'admin'];
+const views = ['menu', 'leaderboard', 'qr', 'admin', 'game'];
 function showView(v) {
   views.forEach(id => {
     document.getElementById('view-'+id).classList.toggle('active', id===v);
@@ -773,6 +925,7 @@ function showView(v) {
   if (v === 'menu') renderMenu();
   if (v === 'leaderboard') renderLeaderboard(currentLbFilter, document.querySelector('.lb-filter.active'));
   if (v === 'admin') renderAdminInit();
+  if (v === 'game') { initGameView(); } else { stopGameLoop(); }
 }
 
 let activeDay = 0;
@@ -1207,6 +1360,563 @@ function seedIfEmptyFirebase() {
   db.ref('ratings').set(formattedRatings);
   db.ref('password').set('chef1234');
 }
+
+// ══════════════════════════════════════════
+//  DAILY SWERVE RACE — MINI GAME
+//  A brand-new track every day (same for every visitor, generated from
+//  today's date), arcade top-down steering, and a weekly cloud leaderboard.
+// ══════════════════════════════════════════
+const RACE_CANVAS_SIZE = 600;
+const RACE_TRACK_RADIUS = 230;
+const RACE_ROAD_WIDTH = 70;
+const RACE_CP_COUNT = 8;
+const RACE_CP_RADIUS = 55;
+const RACE_MAX_SPEED = 200;
+const RACE_ACCEL = 260;
+const RACE_FRICTION = 150;
+const RACE_OFFTRACK_DRAG = 3.0;
+const RACE_TURN_RATE = 3.1;
+const RACE_MAX_SECONDS = 180;
+
+let raceCtx = null;
+let raceAnimId = null;
+let raceState = 'idle'; // idle | countdown | racing | finished
+let raceTrack = null;
+let raceCar = null;
+let raceStartTime = 0;
+let raceElapsed = 0;
+let raceNextCp = 1;
+let raceKeys = { left: false, right: false, gas: false };
+let raceFinalTimeMs = null;
+let raceLastFrameTime = 0;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Deterministic seeded RNG so every visitor gets the exact same track today
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function stringSeed(str) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return h >>> 0;
+}
+
+function generateDailyTrack() {
+  const rng = mulberry32(stringSeed('swervle-' + todayKey()));
+  const cx = RACE_CANVAS_SIZE/2, cy = RACE_CANVAS_SIZE/2;
+  const harmonics = [];
+  
+  // Increased complexity: 4 to 7 harmonics for a twistier track
+  const numHarmonics = 4 + Math.floor(rng()*4);
+  for (let i=0;i<numHarmonics;i++) {
+    harmonics.push({ freq: 2 + Math.floor(rng()*4), amp: 12 + rng()*25, phase: rng()*Math.PI*2 });
+  }
+  
+  const N = 240;
+  const points = [];
+  for (let i=0;i<N;i++) {
+    const theta = (i/N)*Math.PI*2;
+    let r = RACE_TRACK_RADIUS;
+    harmonics.forEach(h => { r += Math.sin(theta*h.freq + h.phase) * h.amp; });
+    points.push({ x: cx + Math.cos(theta)*r, y: cy + Math.sin(theta)*r });
+  }
+  
+  const cps = [];
+  for (let i=0;i<RACE_CP_COUNT;i++) cps.push(Math.floor(i * N / RACE_CP_COUNT));
+
+  // Generate pickups (Boosts and Mud/Oil)
+  const pickups = [];
+  const numPickups = 10 + Math.floor(rng() * 8); // 10 to 17 pickups
+  for (let i = 0; i < numPickups; i++) {
+    // distribute somewhat evenly around track
+    const segment = Math.floor(N / numPickups);
+    const baseIdx = i * segment;
+    const trackIdx = (baseIdx + Math.floor(rng() * (segment - 10)) + 5) % N;
+
+    const p = points[trackIdx];
+    const nextP = points[(trackIdx + 1) % N];
+    const dx = nextP.x - p.x;
+    const dy = nextP.y - p.y;
+    const len = Math.hypot(dx, dy);
+    
+    // Normal vector
+    const nx = -dy / len;
+    const ny = dx / len;
+    
+    // Offset from center line
+    const offsetMag = (rng() * RACE_ROAD_WIDTH * 0.35) * (rng() > 0.5 ? 1 : -1);
+
+    const isBoost = rng() > 0.4; // 60% boost, 40% mud
+    pickups.push({
+      x: p.x + nx * offsetMag,
+      y: p.y + ny * offsetMag,
+      type: isBoost ? 'boost' : 'mud',
+      active: true,
+      radius: isBoost ? 12 : 16
+    });
+  }
+
+  return { points, cps, pickups, day: todayKey() };
+}
+
+function isOnTrack(x, y) {
+  const pts = raceTrack.points;
+  let minD = Infinity;
+  for (let i=0;i<pts.length;i++) {
+    const dx = x-pts[i].x, dy = y-pts[i].y;
+    const d = dx*dx+dy*dy;
+    if (d < minD) minD = d;
+  }
+  return Math.sqrt(minD) <= RACE_ROAD_WIDTH/2 + 4;
+}
+
+function resetCarToStart() {
+  const p0 = raceTrack.points[0];
+  const p1 = raceTrack.points[1];
+  const ang = Math.atan2(p1.y-p0.y, p1.x-p0.x);
+  
+  raceCar = { x: p0.x, y: p0.y, angle: ang, speed: 0, boostTimer: 0, mudTimer: 0 };
+  raceNextCp = 1;
+  raceElapsed = 0;
+  raceFinalTimeMs = null;
+  raceKeys = { left: false, right: false, gas: false };
+  
+  if (raceTrack && raceTrack.pickups) {
+     raceTrack.pickups.forEach(p => p.active = true);
+  }
+  
+  const t = document.getElementById('hudTime'); if (t) t.textContent = '00:00.0';
+  const c = document.getElementById('hudCheckpoints'); if (c) c.textContent = `0 / ${RACE_CP_COUNT-1}`;
+}
+
+function restartRaceNow() {
+  if (raceState === 'idle' || raceState === 'finished') return;
+  startCountdown(); // This resets the car and begins the countdown immediately
+}
+
+function updateRace(dt) {
+  if (raceCar.boostTimer > 0) raceCar.boostTimer -= dt;
+  if (raceCar.mudTimer > 0) raceCar.mudTimer -= dt;
+
+  let currentMaxSpeed = RACE_MAX_SPEED;
+  let currentAccel = RACE_ACCEL;
+  let currentFric = RACE_FRICTION;
+  let currentTurn = RACE_TURN_RATE;
+
+  // Apply modifiers from pickups
+  if (raceCar.boostTimer > 0) {
+    currentMaxSpeed *= 1.5;
+    currentAccel *= 1.8;
+  } else if (raceCar.mudTimer > 0) {
+    currentMaxSpeed *= 0.5;
+    currentFric *= 2.0;
+    currentTurn *= 0.6; // sluggish steering
+  }
+
+  let steer = 0;
+  if (raceKeys.left) steer -= 1;
+  if (raceKeys.right) steer += 1;
+  const speedFrac = Math.min(1, raceCar.speed / currentMaxSpeed);
+  raceCar.angle += steer * currentTurn * (0.35 + 0.65*speedFrac) * dt;
+
+  const onTrack = isOnTrack(raceCar.x, raceCar.y);
+  if (raceKeys.gas) raceCar.speed += currentAccel * dt;
+  else raceCar.speed -= currentFric * dt;
+  if (!onTrack) raceCar.speed -= currentFric * RACE_OFFTRACK_DRAG * dt;
+
+  // Check collision with pickups
+  if (raceTrack && raceTrack.pickups) {
+    raceTrack.pickups.forEach(p => {
+      if (!p.active) return;
+      const dist = Math.hypot(raceCar.x - p.x, raceCar.y - p.y);
+      if (dist < p.radius + 10) { // rough collision bounding
+        p.active = false;
+        if (p.type === 'boost') {
+          raceCar.boostTimer = 1.5; // 1.5 seconds of boost
+          raceCar.mudTimer = 0; // cancels slow down
+        } else {
+          raceCar.mudTimer = 2.0; // 2 seconds of mud
+          raceCar.boostTimer = 0; // cancels boost
+          raceCar.speed *= 0.6; // immediate slow down kick
+        }
+      }
+    });
+  }
+
+  raceCar.speed = Math.max(0, Math.min(currentMaxSpeed, raceCar.speed));
+
+  raceCar.x += Math.cos(raceCar.angle) * raceCar.speed * dt;
+  raceCar.y += Math.sin(raceCar.angle) * raceCar.speed * dt;
+  
+  // Keep inside canvas bounds
+  raceCar.x = Math.max(16, Math.min(RACE_CANVAS_SIZE-16, raceCar.x));
+  raceCar.y = Math.max(16, Math.min(RACE_CANVAS_SIZE-16, raceCar.y));
+}
+
+function checkCheckpoints() {
+  if (raceState !== 'racing') return;
+  if (raceNextCp < RACE_CP_COUNT) {
+    const p = raceTrack.points[raceTrack.cps[raceNextCp]];
+    if (Math.hypot(raceCar.x-p.x, raceCar.y-p.y) < RACE_CP_RADIUS) raceNextCp++;
+  } else {
+    const p0 = raceTrack.points[raceTrack.cps[0]];
+    if (Math.hypot(raceCar.x-p0.x, raceCar.y-p0.y) < RACE_CP_RADIUS) finishRace();
+  }
+}
+
+function formatRaceTime(totalSec) {
+  const m = Math.floor(totalSec/60);
+  const s = totalSec - m*60;
+  return `${String(m).padStart(2,'0')}:${s.toFixed(1).padStart(4,'0')}`;
+}
+
+function drawRace() {
+  if (!raceCtx || !raceTrack) return;
+  const ctx = raceCtx;
+  ctx.clearRect(0,0,RACE_CANVAS_SIZE,RACE_CANVAS_SIZE);
+  ctx.fillStyle = '#3c4d34';
+  ctx.fillRect(0,0,RACE_CANVAS_SIZE,RACE_CANVAS_SIZE);
+
+  // Draw track base
+  ctx.beginPath();
+  raceTrack.points.forEach((p,i) => { if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); });
+  ctx.closePath();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.lineWidth = RACE_ROAD_WIDTH + 10;
+  ctx.strokeStyle = '#241f1a';
+  ctx.stroke();
+  ctx.lineWidth = RACE_ROAD_WIDTH;
+  ctx.strokeStyle = '#4a4640';
+  ctx.stroke();
+  
+  // Draw center line
+  ctx.setLineDash([14,14]);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(232,192,122,0.85)';
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw Pickups (Boosts and Mud)
+  if (raceTrack.pickups) {
+    raceTrack.pickups.forEach(p => {
+      if (!p.active) return;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+      if (p.type === 'boost') {
+        ctx.fillStyle = '#34d399';
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 2;
+        ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px "DM Sans", Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('>>', p.x, p.y);
+      } else {
+        ctx.fillStyle = '#1c1917'; // very dark brown/black
+        ctx.fill();
+        // Add random blobs to make it look like a splatter
+        ctx.beginPath();
+        ctx.arc(p.x - 4, p.y + 4, p.radius * 0.7, 0, Math.PI*2);
+        ctx.arc(p.x + 5, p.y - 2, p.radius * 0.8, 0, Math.PI*2);
+        ctx.fill();
+      }
+    });
+  }
+
+  // Draw checkpoints
+  raceTrack.cps.forEach((idx, i) => {
+    const p = raceTrack.points[idx];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+    ctx.fillStyle = i === 0 ? '#C9923A' : (i < raceNextCp ? '#5C7A5C' : 'rgba(255,255,255,0.5)');
+    ctx.fill();
+  });
+
+  // Draw car
+  if (raceCar) {
+    ctx.save();
+    ctx.translate(raceCar.x, raceCar.y);
+    ctx.rotate(raceCar.angle);
+    
+    // Status visual effects
+    if (raceCar.boostTimer > 0) {
+       ctx.shadowColor = '#34d399';
+       ctx.shadowBlur = 15;
+    } else if (raceCar.mudTimer > 0) {
+       ctx.fillStyle = 'rgba(28, 25, 23, 0.5)';
+       ctx.beginPath();
+       ctx.arc(0, 0, 16, 0, Math.PI*2);
+       ctx.fill();
+    }
+
+    ctx.fillStyle = '#C9923A';
+    ctx.strokeStyle = '#1A1612';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(11,0);
+    ctx.lineTo(-8,7);
+    ctx.lineTo(-8,-7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function raceLoop(ts) {
+  if (!raceLastFrameTime) raceLastFrameTime = ts;
+  const dt = Math.min(0.05, (ts - raceLastFrameTime)/1000);
+  raceLastFrameTime = ts;
+
+  if (raceState === 'racing') {
+    updateRace(dt);
+    checkCheckpoints();
+    raceElapsed = (performance.now() - raceStartTime)/1000;
+    const t = document.getElementById('hudTime'); if (t) t.textContent = formatRaceTime(raceElapsed);
+    const c = document.getElementById('hudCheckpoints'); if (c) c.textContent = `${Math.min(raceNextCp, RACE_CP_COUNT-1)} / ${RACE_CP_COUNT-1}`;
+    if (raceElapsed >= RACE_MAX_SECONDS) timeOutRace();
+  }
+  drawRace();
+  raceAnimId = requestAnimationFrame(raceLoop);
+}
+
+function stopGameLoop() {
+  if (raceAnimId) { cancelAnimationFrame(raceAnimId); raceAnimId = null; }
+  raceLastFrameTime = 0;
+  raceKeys = { left: false, right: false, gas: false };
+}
+
+function startCountdown() {
+  document.getElementById('gameStartOverlay').style.display = 'none';
+  document.getElementById('gameResultOverlay').style.display = 'none';
+  resetCarToStart();
+  raceState = 'countdown';
+  const el = document.getElementById('countdownNum');
+  document.getElementById('gameCountdownOverlay').style.display = 'flex';
+  const seq = ['3','2','1','GO!'];
+  let i = 0;
+  el.textContent = seq[0];
+  const iv = setInterval(() => {
+    i++;
+    if (i >= seq.length) {
+      clearInterval(iv);
+      document.getElementById('gameCountdownOverlay').style.display = 'none';
+      raceState = 'racing';
+      raceStartTime = performance.now();
+      raceLastFrameTime = 0;
+    } else {
+      el.textContent = seq[i];
+    }
+  }, 700);
+}
+
+function finishRace() {
+  raceState = 'finished';
+  raceFinalTimeMs = Math.round(performance.now() - raceStartTime);
+  document.getElementById('resultTitle').textContent = 'Finished! 🏁';
+  document.getElementById('resultTime').textContent = formatRaceTime(raceFinalTimeMs/1000);
+  document.getElementById('resultSaveGroup').style.display = 'block';
+  document.getElementById('racerName').style.display = '';
+  document.getElementById('racerName').value = getSavedRacerName();
+  document.getElementById('gameResultOverlay').style.display = 'flex';
+  updateBestHud();
+}
+
+function timeOutRace() {
+  raceState = 'finished';
+  raceFinalTimeMs = null;
+  document.getElementById('resultTitle').textContent = "Time's up!";
+  document.getElementById('resultTime').textContent = 'DNF';
+  document.getElementById('resultSaveGroup').style.display = 'none';
+  document.getElementById('gameResultOverlay').style.display = 'flex';
+}
+
+function resetGameView() {
+  document.getElementById('gameResultOverlay').style.display = 'none';
+  document.getElementById('gameCountdownOverlay').style.display = 'none';
+  document.getElementById('gameStartOverlay').style.display = 'flex';
+  const grp = document.getElementById('resultSaveGroup');
+  if (grp) grp.style.display = 'block';
+  const btn = grp ? grp.querySelector('.primary-btn') : null;
+  if (btn) { btn.disabled = false; btn.textContent = 'Save Score'; }
+  raceState = 'idle';
+  resetCarToStart();
+  drawRace();
+}
+
+function initGameView() {
+  const lbl = document.getElementById('game-date-label');
+  if (lbl) lbl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  const canvas = document.getElementById('raceCanvas');
+  if (canvas && !raceCtx) raceCtx = canvas.getContext('2d');
+
+  const key = todayKey();
+  if (!raceTrack || raceTrack.day !== key) {
+    raceTrack = generateDailyTrack();
+  }
+  resetGameView();
+  updateBestHud();
+  renderGameLeaderboard();
+
+  if (!raceAnimId) {
+    raceLastFrameTime = 0;
+    raceAnimId = requestAnimationFrame(raceLoop);
+  }
+}
+
+// ── Best time (local) + weekly cloud leaderboard ──
+function getSavedRacerName() { return localStorage.getItem('chefRacerName') || ''; }
+function saveRacerName(n) { localStorage.setItem('chefRacerName', n); }
+
+function getMyBestTime() {
+  try { return JSON.parse(localStorage.getItem('chefMyBestRace') || 'null'); } catch { return null; }
+}
+function setMyBestTimeIfBetter(ms) {
+  const cur = getMyBestTime();
+  if (!cur || ms < cur.ms) localStorage.setItem('chefMyBestRace', JSON.stringify({ ms, day: todayKey() }));
+}
+function updateBestHud() {
+  const el = document.getElementById('hudBest');
+  if (!el) return;
+  const b = getMyBestTime();
+  el.textContent = b ? formatRaceTime(b.ms/1000) : '--:--.-';
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function submitRaceScore() {
+  const nameInput = document.getElementById('racerName');
+  const name = nameInput.value.trim();
+  if (!name) { showToast('Enter your name to save your score'); return; }
+  if (raceFinalTimeMs == null) return;
+
+  saveRacerName(name);
+  setMyBestTimeIfBetter(raceFinalTimeMs);
+  updateBestHud();
+
+  const btn = document.querySelector('#resultSaveGroup .primary-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+  const weekKey = currentWeekKey();
+  db.ref('gameScores/' + weekKey).push({
+    name: name,
+    ms: raceFinalTimeMs,
+    date: todayKey(),
+    ts: Date.now()
+  }).then(() => {
+    if (btn) btn.textContent = 'Saved ✓';
+    showToast('Score saved to the leaderboard!');
+    renderGameLeaderboard();
+  }).catch(() => {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Score'; }
+    showToast('Could not save score — check your connection.');
+  });
+}
+
+function renderGameLeaderboard() {
+  const tbody = document.getElementById('gameLbBody');
+  if (!tbody) return;
+  const weekKey = currentWeekKey();
+  const scores = (cloudData.gameScores && cloudData.gameScores[weekKey]) || {};
+  const list = Object.values(scores)
+    .filter(s => s && typeof s.ms === 'number')
+    .sort((a,b) => a.ms - b.ms)
+    .slice(0, 20);
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:13px;">No race times yet this week. Be the first to set one!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((s,i) => `
+    <tr>
+      <td class="lb-rank ${i<3?'top':''}">${i+1}</td>
+      <td class="lb-meal-name">${escapeHtml(s.name)}</td>
+      <td><div class="lb-avg">${formatRaceTime(s.ms/1000)}</div></td>
+      <td class="lb-count">${s.date || ''}</td>
+    </tr>`).join('');
+}
+
+// ── Controls: keyboard (desktop) + on-screen buttons (touch) ──
+function isTypingTarget(e) {
+  const t = e.target;
+  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+}
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('view-game').classList.contains('active')) return;
+  if (isTypingTarget(e)) return;
+  const k = e.key;
+  if (k === 'ArrowLeft' || k === 'a' || k === 'A') { raceKeys.left = true; e.preventDefault(); }
+  if (k === 'ArrowRight' || k === 'd' || k === 'D') { raceKeys.right = true; e.preventDefault(); }
+  if (k === 'ArrowUp' || k === 'w' || k === 'W') { raceKeys.gas = true; e.preventDefault(); }
+});
+document.addEventListener('keyup', (e) => {
+  if (isTypingTarget(e)) return;
+  const k = e.key;
+  if (k === 'ArrowLeft' || k === 'a' || k === 'A') raceKeys.left = false;
+  if (k === 'ArrowRight' || k === 'd' || k === 'D') raceKeys.right = false;
+  if (k === 'ArrowUp' || k === 'w' || k === 'W') raceKeys.gas = false;
+});
+
+function setupTouchControls() {
+  const bind = (id, key) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const down = (e) => { e.preventDefault(); raceKeys[key] = true; };
+    const up = (e) => { e.preventDefault(); raceKeys[key] = false; };
+    el.addEventListener('touchstart', down, { passive: false });
+    el.addEventListener('touchend', up);
+    el.addEventListener('touchcancel', up);
+    el.addEventListener('mousedown', down);
+    el.addEventListener('mouseup', up);
+    el.addEventListener('mouseleave', up);
+  };
+  bind('btnLeft', 'left');
+  bind('btnRight', 'right');
+  bind('btnGas', 'gas');
+}
+setupTouchControls();
+
+// ── First-visit popup (shows once per day) ──
+function shouldShowGamePopupToday() {
+  return localStorage.getItem('chefGamePopupSeen') !== todayKey();
+}
+function markGamePopupSeen() { localStorage.setItem('chefGamePopupSeen', todayKey()); }
+function dismissGamePopup() {
+  document.getElementById('gamePopupOverlay').classList.remove('show');
+  markGamePopupSeen();
+}
+function playNowFromPopup() {
+  markGamePopupSeen();
+  document.getElementById('gamePopupOverlay').classList.remove('show');
+  showView('game');
+}
+function maybeShowGamePopup() {
+  if (shouldShowGamePopupToday()) {
+    setTimeout(() => {
+      const el = document.getElementById('gamePopupOverlay');
+      if (el) el.classList.add('show');
+    }, 900);
+  }
+}
+maybeShowGamePopup();
 </script>
 </body>
 </html>
