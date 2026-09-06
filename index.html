@@ -1433,7 +1433,7 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  // The five-minute mark is a difficulty target, not a forced death timer.
  function flightDifficulty(seconds){
   const ramp=Math.min(1.6,Math.max(0,seconds)/300);
-  return {speed:145+285*Math.pow(ramp,1.3),interval:1.8-0.5*Math.min(ramp,1),gap:Math.max(96,144-32*ramp),maxShift:65+25*Math.min(ramp,1)};
+  return {speed:145+285*Math.pow(ramp,1.3),interval:1.8-0.5*Math.min(ramp,1),gap:Math.max(80,120-32*ramp),maxShift:65+25*Math.min(ramp,1)};
  }
  let snake=[{x:8,y:10},{x:7,y:10},{x:6,y:10}],direction={x:1,y:0},pending=direction,turned=false,food={x:12,y:10};
  const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
@@ -1447,7 +1447,7 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  ag('arcadeControls').replaceChildren();controls.forEach(([a,label])=>{const b=document.createElement('button');b.className='nav-btn';b.textContent=label;b.setAttribute('aria-label',a==='up'&&kind==='blocks'?'Rotate':a);ag('arcadeControls').append(b);listen(b,'pointerdown',e=>{e.preventDefault();action(a);});listen(b,'click',e=>{if(e.detail===0)action(a);});});
  listen(document,'keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;const a={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',' ':'drop'}[e.key];if(a){e.preventDefault();action(a);}});
  let touch=null;listen(canvas,'pointerdown',e=>{e.preventDefault();if(kind==='flap')action('flap');else{touch={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});listen(canvas,'pointerup',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<12)return;action(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up');});
- function update(dt){elapsed+=dt;if(arcadeNow()>=closes||elapsed>=600){end();return;}if(kind==='flap'){const difficulty=flightDifficulty(elapsed);velocity+=760*dt;bird+=velocity*dt;pipeTimer+=dt;
+ function update(dt){elapsed+=dt;if(arcadeNow()>=closes||elapsed>=600){end();return;}if(kind==='flap'){const difficulty=flightDifficulty(elapsed);velocity+=1060*dt;bird+=velocity*dt;pipeTimer+=dt;
  if(pipeTimer>=difficulty.interval){
   pipeTimer-=difficulty.interval;
   // Bound vertical changes so random pipe pairs do not require impossible jumps.
