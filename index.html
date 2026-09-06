@@ -1312,7 +1312,29 @@ const arcadeFail=message=>{throw new Error(message);};
 function arcadeUid(){return arcadeAuth.currentUser?.uid||arcadeFail('Sign in to your game account first.');}
 function arcadeLocalParts(ms){return Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(ms).map(p=>[p.type,p.value]));}
 function arcadeMidnight(localMs){let t=localMs;for(let i=0;i<3;i++){const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(t).map(p=>[p.type,p.value]));t+=localMs-Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second);}return t;}
-function arcadeScheduleAt(now,isAdmin){const p=arcadeLocalParts(now),day=Date.UTC(+p.year,+p.month-1,+p.day),dow=new Date(day).getUTCDay(),mon=day-((dow+6)%7)*86400000,publicOpens=arcadeMidnight(mon+2*86400000),adminOpens=arcadeMidnight(mon-1*86400000),closes=arcadeMidnight(mon+5*86400000),opens=isAdmin?adminOpens:publicOpens,index=((Math.floor((mon-Date.UTC(2026,8,7))/604800000)%3)+3)%3;return {week:new Date(mon).toISOString().slice(0,10),key:String(mon),game:['flap','blocks','snake'][index],open:now>=opens&&now<closes,opens,adminOpens,publicOpens,closes,earlyAccess:!!isAdmin&&now>=adminOpens&&now<publicOpens,nextOpen:now<opens?opens:arcadeMidnight(mon+(isAdmin?6:9)*86400000),serverNow:now,zone:'America/Chicago'};}
+function arcadeScheduleAt(now,isAdmin){
+  const p=arcadeLocalParts(now),
+  day=Date.UTC(+p.year,+p.month-1,+p.day),
+  dow=new Date(day).getUTCDay(),
+  // FIX: Treat Sunday (0) as the start of the new week (-1) instead of the end of the old week (6)
+  mon=day-(dow===0?-1:dow-1)*86400000,
+  publicOpens=arcadeMidnight(mon+2*86400000),
+  adminOpens=arcadeMidnight(mon-1*86400000),
+  closes=arcadeMidnight(mon+5*86400000),
+  opens=isAdmin?adminOpens:publicOpens,
+  index=((Math.floor((mon-Date.UTC(2026,8,7))/604800000)%3)+3)%3;
+  return {
+    week:new Date(mon).toISOString().slice(0,10),
+    key:String(mon),
+    game:['flap','blocks','snake'][index],
+    open:now>=opens&&now<closes,
+    opens,adminOpens,publicOpens,closes,
+    earlyAccess:!!isAdmin&&now>=adminOpens&&now<publicOpens,
+    nextOpen:now<opens?opens:arcadeMidnight(mon+(isAdmin?6:9)*86400000),
+    serverNow:now,
+    zone:'America/Chicago'
+  };
+}
 async function arcadeCheckAdmin(uid){try{const doc=await arcadeStore.collection('sparkArcadeAdmins').doc(uid).get({source:'server'});return doc.exists&&doc.data().enabled===true;}catch(e){return false;}}
 function arcadePublicProfile(p){return {...p,level:1+Math.floor(p.xp/100),spins:Math.floor(p.xp/100)-p.usedSpins};}
 function arcadeWriteMirrors(tx,uid,p){if(!p.week)return;tx.set(arcadeStatsRef(p.week,uid),{...p.stats,name:p.name,equipped:p.equipped});tx.set(arcadeBoardRef(p.week,uid),{name:p.name,equipped:p.equipped,score:p.stats.best});}
