@@ -1429,11 +1429,11 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  const canvas=document.createElement('canvas');canvas.width=360;canvas.height=480;canvas.setAttribute('aria-label',arcadeTitles[kind]+' game area');canvas.tabIndex=0;ag('arcadeCanvasHost').replaceChildren(canvas);const ctx=canvas.getContext('2d');let alive=true,raf=0,last=0,elapsed=0,score=0,acc=0;const remove=[];const api={get score(){return score;},stop(){alive=false;cancelAnimationFrame(raf);remove.forEach(f=>f());}};
  const listen=(el,type,fn,opt)=>{el.addEventListener(type,fn,opt);remove.push(()=>el.removeEventListener(type,fn,opt));};
  const points=n=>{score+=n;onScore(score);};const end=()=>{if(!alive)return;api.stop();queueMicrotask(onEnd);};
- let bird=210,velocity=0,pipes=[],pipeTimer=0,lastPipeGap=240;
+ let bird=210,velocity=0,pipes=[],pipeTimer=0,lastPipeGap=240,pipesUntilSweep=6+Math.floor(Math.random()*4),sweepNext=null,nextPipeExtra=0;
  // The five-minute mark is a difficulty target, not a forced death timer.
  function flightDifficulty(seconds){
   const ramp=Math.min(1.6,Math.max(0,seconds)/300);
-  return {speed:145+285*Math.pow(ramp,1.3),interval:1.8-0.5*Math.min(ramp,1),gap:Math.max(80,120-32*ramp),maxShift:65+25*Math.min(ramp,1)};
+  return {speed:145+285*Math.pow(ramp,1.3),interval:1.8-0.5*Math.min(ramp,1),gap:Math.max(72,112-32*ramp),maxShift:65+25*Math.min(ramp,1)};
  }
  let snake=[{x:8,y:10},{x:7,y:10},{x:6,y:10}],direction={x:1,y:0},pending=direction,turned=false,food={x:12,y:10};
  const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
@@ -1448,10 +1448,22 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  listen(document,'keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;const a={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',' ':'drop'}[e.key];if(a){e.preventDefault();action(a);}});
  let touch=null;listen(canvas,'pointerdown',e=>{e.preventDefault();if(kind==='flap')action('flap');else{touch={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});listen(canvas,'pointerup',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<12)return;action(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up');});
  function update(dt){elapsed+=dt;if(arcadeNow()>=closes||elapsed>=600){end();return;}if(kind==='flap'){const difficulty=flightDifficulty(elapsed);velocity+=1060*dt;bird+=velocity*dt;pipeTimer+=dt;
- if(pipeTimer>=difficulty.interval){
-  pipeTimer-=difficulty.interval;
-  // Bound vertical changes so random pipe pairs do not require impossible jumps.
-  lastPipeGap=Math.max(100,Math.min(380,lastPipeGap+(Math.random()*2-1)*difficulty.maxShift));
+ if(pipeTimer>=difficulty.interval+nextPipeExtra){
+  pipeTimer-=difficulty.interval+nextPipeExtra;
+  const edge=difficulty.gap/2+18;
+  if(sweepNext!==null){
+   // Complete an occasional low/high pair near opposite screen edges.
+   lastPipeGap=sweepNext==='top'?edge:480-edge;
+   sweepNext=null;pipesUntilSweep=6+Math.floor(Math.random()*4);nextPipeExtra=0;
+  }else if(--pipesUntilSweep<=0){
+   const firstLow=Math.random()<0.5;
+   lastPipeGap=firstLow?480-edge:edge;sweepNext=firstLow?'top':'bottom';
+   // Give the large climb/drop a little extra travel time, even late in a run.
+   nextPipeExtra=0.25;
+  }else{
+   lastPipeGap=Math.max(edge,Math.min(480-edge,lastPipeGap+(Math.random()*2-1)*difficulty.maxShift));
+   nextPipeExtra=0;
+  }
   pipes.push({x:380,gap:lastPipeGap,halfGap:difficulty.gap/2,passed:false});
  }
  for(const p of pipes){p.x-=difficulty.speed*dt;if(!p.passed&&p.x+48<82){p.passed=true;points(1);}if(p.x<94&&p.x+48>70&&(bird-12<p.gap-p.halfGap||bird+12>p.gap+p.halfGap))end();}pipes=pipes.filter(p=>p.x>-60);if(bird<12||bird>468)end();}else if(kind==='snake'){acc+=dt;if(acc>=Math.max(.09,.17-score*.0002)){acc=0;direction=pending;turned=false;const head={x:snake[0].x+direction.x,y:snake[0].y+direction.y},eat=head.x===food.x&&head.y===food.y;if(head.x<0||head.x>=18||head.y<0||head.y>=24||snake.slice(0,eat?snake.length:-1).some(p=>p.x===head.x&&p.y===head.y)){end();return;}snake.unshift(head);if(eat){points(10);const free=[];for(let y=0;y<24;y++)for(let x=0;x<18;x++)if(!snake.some(p=>p.x===x&&p.y===y))free.push({x,y});if(!free.length){end();return;}food=free[Math.floor(Math.random()*free.length)];}else snake.pop();}}else{acc+=dt;if(acc>=Math.max(.14,.65-score/12000)){acc=0;drop();}}}
@@ -1459,8 +1471,6 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  function frame(t){if(!alive)return;const dt=last?Math.min((t-last)/1000,.04):0;last=t;update(dt);draw();if(alive)raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);return api;
 }
 async function loadArcadeStats(){if(!adminLoggedIn)return;const target=ag('arcadeStatsBody');target.textContent='Loading game statistics…';try{if(!arcadeUser)throw new Error('Sign in to your game-admin account in the Games tab, then return here.');const week=ag('arcadeStatsWeek').value||undefined,data=await arcadeCall('Stats',{week}),players=data.players.sort((a,b)=>b.starts-a.starts||b.seconds-a.seconds);ag('arcadeStatsWeek').value=data.week;const sum=k=>players.reduce((n,p)=>n+(p[k]||0),0);ag('arcadeMetrics').innerHTML=[['Players',players.length],['Rounds started',sum('starts')],['Rounds completed',sum('completed')],['Minutes played',Math.round(sum('seconds')/60)]].map(([label,n])=>'<div class="arcade-metric"><strong>'+n+'</strong>'+label+'</div>').join('');ag('arcadeStatsLeaders').textContent=players.length?'Most rounds: '+players[0].name+' ('+players[0].starts+'). Most time: '+[...players].sort((a,b)=>b.seconds-a.seconds)[0].name+'.':'';target.innerHTML=players.length?'<div class="arcade-table-scroll"><table class="lb-table"><thead><tr><th>Player</th><th>Starts</th><th>Finished</th><th>Minutes</th><th>Best</th><th>Avg score</th></tr></thead><tbody>'+players.map(p=>'<tr><td>'+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.starts+'</td><td>'+p.completed+'</td><td>'+(p.seconds/60).toFixed(1)+'</td><td>'+p.best+'</td><td>'+ (p.completed?Math.round(p.totalScore/p.completed):'—')+'</td></tr>').join('')+'</tbody></table></div>':'No play recorded for this week.';}catch(e){ag('arcadeMetrics').replaceChildren();ag('arcadeStatsLeaders').textContent='';target.textContent=arcadeError(e);}}
-
-
 </script>
 </body>
 </html>
