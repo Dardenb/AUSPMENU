@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chef's Weekly Menu</title>
+<title>CP Weekly Menu</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -536,6 +536,25 @@
 .arcade-swatch{display:inline-block;width:22px;height:22px;flex-shrink:0;border-radius:5px;background-clip:border-box;-webkit-background-clip:border-box;background-color:var(--skin-solid,transparent)}
 @media(prefers-reduced-motion:reduce){.arcade-name,.arcade-slice,.arcade-swatch{animation:none!important}#arcadeWheel{transition:none}}
 .arcade-pi{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23392057%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2219%22%20font-family%3D%22Georgia%2Cserif%22%20font-weight%3D%22bold%22%20font-size%3D%2221%22%20fill%3D%22%23edc868%22%3E%CF%80%3C/text%3E%3C/svg%3E");background-size:24px 24px}
+
+/* Game characters share the exact CSS textures used by names and the wheel. */
+.arcade-stage{position:relative;width:100%;max-width:360px;margin:14px auto}
+#arcadeCanvasHost .arcade-stage canvas{width:100%;max-width:none;margin:0}
+.arcade-character-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:12px}
+.arcade-character{position:absolute;display:block;background-clip:border-box;-webkit-background-clip:border-box;background-color:var(--skin-solid,#edbd61);box-shadow:inset 0 0 0 1px #ffffff80;pointer-events:none}
+.arcade-character[hidden]{display:none!important}
+.arcade-character-bird{border-radius:50%}
+.arcade-character-bird::after{content:'';position:absolute;left:66.67%;top:29.17%;width:16.67%;height:16.67%;background:#141c2d;box-shadow:0 0 0 1px #fff9}
+.arcade-character-head{box-shadow:inset 0 0 0 2px #fff}
+@media(prefers-reduced-motion:reduce){.arcade-character{animation:none!important}}
+
+.arcade-crown{display:inline-block;width:24px;height:19px;vertical-align:-3px;margin-right:6px;flex-shrink:0}
+.arcade-crown svg{display:block;width:100%;height:100%;overflow:visible}
+.arcade-crown-gold{color:#e4b62d;--crown-edge:#805613}
+.arcade-crown-silver{color:#c5cedc;--crown-edge:#596b80}
+.arcade-crown-bronze{color:#bd7949;--crown-edge:#704021}
+.arcade-game-crown{position:absolute;margin:0;z-index:2;pointer-events:none}
+.arcade-game-crown[hidden]{display:none!important}
 </style>
 <script id="arcade-skin-catalog">const ARCADE_SKINS = [{"id": "red", "label": "Red", "weight": 1500, "tier": "Common", "description": "Primary color", "color": "#b92832"}, {"id": "yellow", "label": "Yellow", "weight": 1500, "tier": "Common", "description": "Primary color", "color": "#c29700"}, {"id": "blue", "label": "Blue", "weight": 1500, "tier": "Common", "description": "Primary color", "color": "#235da8"}, {"id": "green", "label": "Green", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#277039"}, {"id": "orange", "label": "Orange", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#c15a13"}, {"id": "purple", "label": "Purple", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#793db5"}, {"id": "pink", "label": "Pink", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#c62c7c"}, {"id": "teal", "label": "Teal", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#087c80"}, {"id": "gold", "label": "Gold", "weight": 700, "tier": "Uncommon", "description": "Solid color", "color": "#936200"}, {"id": "beer", "label": "Beer", "weight": 150, "tier": "Rare", "description": "Amber lager with a foam cap and tiny bubbles"}, {"id": "pi", "label": "Pi • π", "weight": 150, "tier": "Rare", "description": "Gold π symbols on deep purple"}, {"id": "water", "label": "Water", "weight": 150, "tier": "Rare", "description": "Blue water with bright curved ripples"}, {"id": "fire", "label": "Fire", "weight": 150, "tier": "Rare", "description": "Yellow flames rising through orange and ember red"}, {"id": "marble", "label": "Marble", "weight": 150, "tier": "Rare", "description": "Silver stone with diagonal mineral veins"}, {"id": "carbon", "label": "Carbon", "weight": 150, "tier": "Rare", "description": "Dark woven carbon-fiber checks"}, {"id": "aurora", "label": "Aurora", "weight": 150, "tier": "Animated", "description": "Original moving green, blue and purple gradient"}, {"id": "galaxy", "label": "Galaxy", "weight": 100, "tier": "Animated", "description": "Original moving violet and blue gradient"}, {"id": "tidal", "label": "Tidal Flow", "weight": 60, "tier": "Animated", "description": "Animated water ripples"}, {"id": "inferno", "label": "Living Fire", "weight": 50, "tier": "Animated", "description": "Animated climbing flames"}, {"id": "supernova", "label": "Supernova", "weight": 25, "tier": "Animated", "description": "Stars over a moving cosmic spectrum"}, {"id": "liquidgold", "label": "Liquid Gold", "weight": 15, "tier": "Animated", "description": "Flowing metallic gold reflections"}];
 
@@ -736,7 +755,7 @@ document.addEventListener('DOMContentLoaded',arcadeBuildWheel);
    <details><summary>Reward wheel &amp; skin collection</summary><div class="arcade-wheel-wrap"><span class="arcade-pointer" aria-hidden="true">▼</span><div id="arcadeWheel"></div><div class="arcade-wheel-hub">SKIN<br>DROP</div></div><button class="primary-btn" id="arcadeSpin">Spin the wheel</button><p id="arcadeSpinResult" role="status" aria-live="polite"></p><p class="arcade-note">Each slice matches its skin’s chance and texture. Spins take 8 seconds. Tiny slices are rare—see all odds below. Duplicate skins still cost one CP Token. Reduced-motion settings skip the animation.</p><div id="arcadeOdds" class="arcade-odds"></div></details>
   </section>
   <section class="section-card arcade-card" id="arcadeChallenge"><div id="arcadeWaiting"><h2>Wait for next week's game</h2><p id="arcadeCountdown">Checking availability…</p><button class="nav-btn" onclick="initGameView()">Refresh availability</button></div><div id="arcadePlayable" hidden><div class="arcade-actions"><h2 id="arcadeGameName"></h2><strong id="arcadeScore">Score 0</strong></div><p id="arcadeInstructions"></p><div id="arcadeCanvasHost"></div><div class="arcade-actions" id="arcadeControls"></div><div class="arcade-actions"><button class="primary-btn" id="arcadeStart">Start round</button><button class="nav-btn" id="arcadeEnd" disabled>End &amp; save</button></div><p id="arcadeResult" role="status" aria-live="polite"></p><p class="arcade-note">Rounds last up to 10 minutes. Leaving the game or hiding the page ends your round.</p></div></section>
-  <section class="section-card arcade-card"><div class="arcade-actions"><h2>This week's leaderboard</h2><button class="nav-btn" onclick="renderGameLeaderboard()">Refresh</button></div><p class="arcade-note">Highest score wins · One entry per player · Resets each Monday</p><table class="lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Best score</th></tr></thead><tbody id="gameLbBody"><tr><td colspan="3">Open the arcade to load scores.</td></tr></tbody></table></section>
+  <section class="section-card arcade-card"><div class="arcade-actions"><h2>This week's leaderboard</h2><button class="nav-btn" onclick="renderGameLeaderboard()">Refresh</button></div><p class="arcade-note">Highest score wins · Top 3 wear crowns · Ties follow leaderboard order · One entry per player · Resets each Monday</p><table class="lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Best score</th></tr></thead><tbody id="gameLbBody"><tr><td colspan="3">Open the arcade to load scores.</td></tr></tbody></table></section>
  </div>
 </div>
 
@@ -1411,6 +1430,16 @@ let arcadeUser=null,arcadePlayer=null,arcadeStatus=null,arcadeOffset=0,arcadeEng
 function arcadeMessage(s){ag('arcadeNotice').textContent=s;}
 function arcadeError(e){const code=e.code||'';return code.includes('wrong-password')||code.includes('user-not-found')||code.includes('invalid-credential')?'Email or password is incorrect.':code.includes('email-already-in-use')?'An account already uses this email. Sign in or reset your password.':code.includes('unavailable')||code.includes('internal')||code.includes('not-found')?'The game service is unavailable. Please try again later.':code.includes('resource-exhausted')?'The free daily game limit has been reached. Please try again after it resets.':code.includes('permission-denied')?'The game request was denied. Check your account, the play window, and the game setup rules.':code.includes('operation-not-allowed')?'Account creation is not enabled yet. Please contact the chapter admin.':e.message||'Something went wrong. Please try again.';}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// Crowns follow the displayed weekly ranking; they never enter collision geometry.
+let arcadeCrownRanks=new Map(),arcadeCrownWeek=null,arcadeBoardWatch=null,arcadeBoardWatchWeek=null;
+const arcadeCrownMetals=['','gold','silver','bronze'];
+const arcadeCrownSVG='<svg viewBox="0 0 30 24" aria-hidden="true"><path d="M3 7L9 12L15 3L21 12L27 7L24 21H6Z" fill="currentColor" stroke="var(--crown-edge)" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 17H23" stroke="#fff" stroke-opacity=".6"/><circle cx="15" cy="13" r="2" fill="#fff" fill-opacity=".85"/></svg>';
+function arcadeCrownHTML(rank){const metal=arcadeCrownMetals[rank];return metal?'<span class="arcade-crown arcade-crown-'+metal+'" role="img" aria-label="'+metal+' crown, rank '+rank+'">'+arcadeCrownSVG+'</span>':'';}
+function arcadeCurrentCrownRank(){return arcadeCrownWeek===arcadeScheduleAt(arcadeNow()).key?arcadeCrownRanks.get(arcadeUser?.uid)||0:0;}
+function arcadeApplyBoard(players,week){
+ arcadeCrownWeek=week;arcadeCrownRanks=new Map(players.slice(0,3).map((p,i)=>[p.id,i+1]));
+ ag('gameLbBody').innerHTML=players.length?players.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+arcadeCrownHTML(i+1)+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.score+'</td></tr>').join(''):'<tr><td colspan="3">No scores yet this week. Be the first to play.</td></tr>';
+}
 function arcadeNameHTML(name,color){return '<span class="arcade-name arcade-'+(arcadeColorIds.includes(color)?color:'default')+'">'+escapeHtml(name)+'</span>';}
 function arcadeNow(){return Date.now()+arcadeOffset;}
 function arcadeOpen(){return arcadeStatus&&arcadeStatus.open&&arcadeNow()<arcadeStatus.closes;}
@@ -1425,9 +1454,27 @@ arcadeAuth.onAuthStateChanged(async user=>{arcadeUser=user;arcadePlayer=null;arc
 ag('arcadeColors').onclick=async e=>{const b=e.target.closest('[data-color]');if(!b)return;b.disabled=true;try{await arcadeCall('Equip',{color:b.dataset.color});await arcadeLoadProfile();await renderGameLeaderboard();}catch(e){arcadeMessage(arcadeError(e));}finally{b.disabled=false;}}
 ag('arcadeSpin').onclick=async()=>{if(arcadeSpinBusy)return;arcadeSpinBusy=true;arcadeRenderProfile();let key='arcadePendingSpin:'+arcadeUser.uid;try{let requestId=sessionStorage.getItem(key);if(!requestId){requestId=crypto.randomUUID();sessionStorage.setItem(key,requestId);}const result=await arcadeCall('Spin',{requestId});sessionStorage.removeItem(key);arcadeWheelAngle=arcadeSpinTarget(result.reward,arcadeWheelAngle);ag('arcadeWheel').style.transform='rotate('+arcadeWheelAngle+'deg)';ag('arcadeSpinResult').textContent='Spinning…';await new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:8100));ag('arcadeSpinResult').textContent=(result.duplicate?'Already collected: ':'Unlocked: ')+(arcadeSkinById(result.reward)?.label||result.reward)+'. '+(result.duplicate?'Your color remains available.':'Select it above to equip it.');await arcadeLoadProfile();}catch(e){arcadeMessage(arcadeError(e));}finally{arcadeSpinBusy=false;arcadeRenderProfile();}};
 async function initGameView(){try{const before=Date.now();arcadeStatus=await arcadeCall('Status');arcadeOffset=arcadeStatus.serverNow-(before+Date.now())/2;arcadeMessage('');arcadeRenderSchedule();await renderGameLeaderboard();}catch(e){arcadeStatus=null;arcadeRenderSchedule();arcadeMessage(arcadeError(e));}}
-function arcadeRenderSchedule(){if(arcadeStatus&&arcadeNow()>=arcadeStatus.closes)arcadeStatus.open=false;const open=arcadeOpen();ag('arcadeWaiting').hidden=!!open;ag('arcadePlayable').hidden=!open;if(!arcadeStatus){ag('arcadeSchedule').textContent='Availability could not be confirmed';ag('arcadeCountdown').textContent='Refresh to check the next challenge.';return;}const s=arcadeStatus;ag('arcadeSchedule').textContent=open?'NOW PLAYING · '+(s.earlyAccess?'Admin early access · ':'')+arcadeTitles[s.game]:'ARCADE CLOSED';if(open){ag('arcadeGameName').textContent=arcadeTitles[s.game];ag('arcadeInstructions').textContent=s.game==='flap'?'Tap the game or press Space to flap. Fly through the gaps for 1 point each.':s.game==='blocks'?'Move and rotate falling blocks to clear rows. 100 points per row. Use the buttons below or arrow keys; Space drops.':'Guide the snake to the gold squares. 10 points each. Swipe, use arrow keys, or tap the direction buttons.';}else{const left=Math.max(0,s.nextOpen-arcadeNow()),hours=Math.floor(left/3600000),minutes=Math.floor(left/60000)%60;ag('arcadeCountdown').textContent=(arcadeIsAdmin?'Your admin access opens: ':'Next game: ')+new Date(s.nextOpen).toLocaleString('en-US',{timeZone:'America/Chicago',weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' CT · '+hours+'h '+minutes+'m to go';if(arcadeEngine){arcadeEngine.stop();arcadeEngine=null;}arcadeRound=null;ag('arcadeStart').disabled=false;ag('arcadeEnd').disabled=true;ag('arcadeCanvasHost').replaceChildren();ag('arcadeControls').replaceChildren();} }
+function arcadeRenderSchedule(){if(arcadeStatus&&arcadeNow()>=arcadeStatus.closes)arcadeStatus.open=false;const open=arcadeOpen();ag('arcadeWaiting').hidden=!!open;ag('arcadePlayable').hidden=!open;if(!arcadeStatus){ag('arcadeSchedule').textContent='Availability could not be confirmed';ag('arcadeCountdown').textContent='Refresh to check the next challenge.';return;}const s=arcadeStatus;ag('arcadeSchedule').textContent=open?'NOW PLAYING · '+(s.earlyAccess?'Admin early access · ':'')+arcadeTitles[s.game]:'ARCADE CLOSED';if(open){ag('arcadeGameName').textContent=arcadeTitles[s.game];ag('arcadeInstructions').textContent=s.game==='flap'?'Tap the game or press Space to flap. Clear gaps for 1 point each. The course gradually speeds up and climbs and drops get harder as your score rises.':s.game==='blocks'?'Move and rotate falling blocks to clear rows. 100 points per row. Use the buttons below or arrow keys; Space drops.':'Guide the snake to the gold squares. 10 points each. Swipe, use arrow keys, or tap the direction buttons.';}else{const left=Math.max(0,s.nextOpen-arcadeNow()),hours=Math.floor(left/3600000),minutes=Math.floor(left/60000)%60;ag('arcadeCountdown').textContent=(arcadeIsAdmin?'Your admin access opens: ':'Next game: ')+new Date(s.nextOpen).toLocaleString('en-US',{timeZone:'America/Chicago',weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' CT · '+hours+'h '+minutes+'m to go';if(arcadeEngine){arcadeEngine.stop();arcadeEngine=null;}arcadeRound=null;ag('arcadeStart').disabled=false;ag('arcadeEnd').disabled=true;ag('arcadeCanvasHost').replaceChildren();ag('arcadeControls').replaceChildren();} }
 setInterval(()=>{if(ag('view-game').classList.contains('active')){if(arcadeStatus&&!arcadeStatus.open&&arcadeNow()>=arcadeStatus.nextOpen)initGameView();else arcadeRenderSchedule();}},15000);
-async function renderGameLeaderboard(){if(arcadeBoardBusy)return;arcadeBoardBusy=true;try{const data=await arcadeCall('Board');ag('gameLbBody').innerHTML=data.players.length?data.players.map((p,i)=>'<tr><td>'+ (i+1)+'</td><td>'+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.score+'</td></tr>').join(''):'<tr><td colspan="3">No scores yet this week. Be the first to play.</td></tr>';}catch(e){ag('gameLbBody').innerHTML='<tr><td colspan="3">Scores are unavailable. Tap Refresh to retry.</td></tr>';}finally{arcadeBoardBusy=false;}}
+async function renderGameLeaderboard(){
+ if(arcadeBoardBusy)return;arcadeBoardBusy=true;
+ const week=arcadeScheduleAt(arcadeNow()).key;
+ const query=arcadeStore.collection('sparkArcadeBoards').doc(week).collection('players').orderBy('score','desc').limit(50);
+ const apply=snap=>arcadeApplyBoard(snap.docs.map(d=>({id:d.id,...d.data()})),week);
+ try{
+  if(arcadeBoardWatch&&arcadeBoardWatchWeek===week){apply(await query.get({source:'server'}));return;}
+  if(arcadeBoardWatch)arcadeBoardWatch();
+  arcadeCrownRanks.clear();arcadeBoardWatchWeek=week;
+  await new Promise((resolve,reject)=>{
+   arcadeBoardWatch=query.onSnapshot(snap=>{if(arcadeBoardWatchWeek===week)apply(snap);resolve();},error=>{
+    arcadeCrownRanks.clear();arcadeBoardWatch=null;arcadeBoardWatchWeek=null;
+    ag('gameLbBody').innerHTML='<tr><td colspan="3">Scores are unavailable. Tap Refresh to retry.</td></tr>';reject(error);
+   });
+  });
+ }catch(e){arcadeCrownRanks.clear();ag('gameLbBody').innerHTML='<tr><td colspan="3">Scores are unavailable. Tap Refresh to retry.</td></tr>';}
+ finally{arcadeBoardBusy=false;}
+}
+
 async function arcadeStartRound(){if(arcadeBusy)return;if(!arcadeUser||!arcadePlayer){arcadeMessage('Sign in or create your account to play.');ag('arcadeAuth').scrollIntoView({behavior:'smooth'});return;}arcadeBusy=true;ag('arcadeStart').disabled=true;try{const s=await arcadeCall('Start');arcadeStatus=s;arcadeOffset=s.serverNow-Date.now();if(!ag('view-game').classList.contains('active'))return;arcadeRound=s;arcadeRetryResult=null;ag('arcadeResult').textContent='';ag('arcadeScore').textContent='Score 0';arcadeEngine=createArcadeEngine(s.game,score=>{ag('arcadeScore').textContent='Score '+score;},()=>arcadeFinishRound(),s.closes);ag('arcadeEnd').disabled=false;arcadeMessage('');}catch(e){arcadeMessage(arcadeError(e));ag('arcadeStart').disabled=false;}finally{arcadeBusy=false;if(!arcadeRound)ag('arcadeStart').disabled=false;}}
 let arcadeRetryResult=null;
 async function arcadeFinishRound(){if(!arcadeRound||arcadeBusy)return;arcadeBusy=true;const round=arcadeRound,score=arcadeEngine?.score||0;arcadeRound=null;if(arcadeEngine)arcadeEngine.stop();arcadeEngine=null;ag('arcadeEnd').disabled=true;ag('arcadeResult').textContent='Saving round…';try{arcadeRetryResult={id:round.id,score};const result=await arcadeCall('Finish',arcadeRetryResult);arcadeRetryResult=null;ag('arcadeResult').textContent='Score '+result.score+' · +'+result.earned+' XP'+(result.levels?' · Level up! You earned '+result.levels+' CP Token'+(result.levels===1?'':'s')+'.':'');await arcadeLoadProfile();await renderGameLeaderboard();}catch(e){ag('arcadeResult').textContent='Save could not be confirmed. '+arcadeError(e);const retry=document.createElement('button');retry.className='nav-btn';retry.textContent='Retry save';retry.onclick=async()=>{retry.disabled=true;try{const r=await arcadeCall('Finish',arcadeRetryResult);arcadeRetryResult=null;ag('arcadeResult').textContent='Score '+r.score+' · +'+r.earned+' XP'+(r.levels?' · Level up! You earned '+r.levels+' CP Token'+(r.levels===1?'':'s')+'.':'');await arcadeLoadProfile();await renderGameLeaderboard();}catch(err){arcadeMessage(arcadeError(err));retry.disabled=false;}};ag('arcadeResult').append(retry);}finally{arcadeBusy=false;ag('arcadeStart').disabled=false;}}
@@ -1435,10 +1482,77 @@ ag('arcadeStart').onclick=arcadeStartRound;ag('arcadeEnd').onclick=arcadeFinishR
 function stopGameLoop(){arcadeFinishRound();}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)arcadeFinishRound();});
 function createArcadeEngine(kind,onScore,onEnd,closes){
- const canvas=document.createElement('canvas');canvas.width=360;canvas.height=480;canvas.setAttribute('aria-label',arcadeTitles[kind]+' game area');canvas.tabIndex=0;ag('arcadeCanvasHost').replaceChildren(canvas);const ctx=canvas.getContext('2d');let alive=true,raf=0,last=0,elapsed=0,score=0,acc=0;const remove=[];const api={get score(){return score;},stop(){alive=false;cancelAnimationFrame(raf);remove.forEach(f=>f());}};
+ const canvas=document.createElement('canvas');canvas.width=360;canvas.height=480;canvas.setAttribute('aria-label',arcadeTitles[kind]+' game area');canvas.tabIndex=0;const stage=document.createElement('div');stage.className='arcade-stage';const characterLayer=document.createElement('div');characterLayer.className='arcade-character-layer';characterLayer.setAttribute('aria-hidden','true');stage.append(canvas,characterLayer);ag('arcadeCanvasHost').replaceChildren(stage);const ctx=canvas.getContext('2d');let alive=true,raf=0,last=0,elapsed=0,score=0,acc=0;const remove=[];const api={get score(){return score;},stop(){alive=false;cancelAnimationFrame(raf);remove.forEach(f=>f());characterLayer.querySelectorAll('.arcade-character').forEach(el=>el.style.animationPlayState='paused');}};
+
+ const crown=document.createElement('div');crown.className='arcade-crown arcade-game-crown';crown.hidden=true;crown.innerHTML=arcadeCrownSVG;characterLayer.append(crown);
+ let lastCrownCheck=0,cachedCrownWeek=null;
+ function drawCharacterCrown(){
+  // Check the week once per second; rankings themselves update live.
+  const now=arcadeNow();if(now-lastCrownCheck>1000||cachedCrownWeek===null){cachedCrownWeek=arcadeScheduleAt(now).key;lastCrownCheck=now;}
+  const rank=arcadeCrownWeek===cachedCrownWeek?arcadeCrownRanks.get(arcadeUser?.uid)||0:0;
+  crown.hidden=!rank;if(!rank)return;
+  const cls='arcade-crown arcade-game-crown arcade-crown-'+arcadeCrownMetals[rank];if(crown.className!==cls)crown.className=cls;
+  let x,y;
+  if(kind==='flap'){x=70;y=bird-29;}
+  else if(kind==='snake'){x=snake[0].x*20-2;y=snake[0].y*20-16;}
+  else{const occupied=[];piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v)occupied.push({x:dx,y:dy});}));const top=Math.min(...occupied.map(c=>c.y)),row=occupied.filter(c=>c.y===top);x=60+(px+(Math.min(...row.map(c=>c.x))+Math.max(...row.map(c=>c.x)))/2)*24;y=(py+top)*24-17;}
+  crown.style.left=(x/360*100)+'%';crown.style.top=(y/480*100)+'%';crown.style.width=(24/360*100)+'%';crown.style.height=(19/480*100)+'%';
+ }
+ const characterSprites=[];
+ function drawCharacterSkins(){
+  const equipped=arcadePlayer?.equipped;
+  const skin=arcadeSkinById(equipped)?equipped:'default';
+  const cells=[];
+  if(skin!=='default'){
+   if(kind==='flap')cells.push([70,bird-12,24,24,'bird']);
+   else if(kind==='snake')snake.forEach((p,i)=>cells.push([p.x*20+1,p.y*20+1,18,18,i===0?'head':'body']));
+   else{
+    board.forEach((r,y)=>r.forEach((v,x)=>{if(v)cells.push([60+x*24+1,y*24+1,22,22,'block']);}));
+    piece.forEach((r,y)=>r.forEach((v,x)=>{if(v)cells.push([60+(px+x)*24+1,(py+y)*24+1,22,22,'block']);}));
+   }
+  }
+  cells.forEach(([x,y,w,h,shape],i)=>{
+   let el=characterSprites[i];
+   if(!el){el=document.createElement('div');characterSprites.push(el);characterLayer.append(el);}
+   const cls='arcade-character arcade-character-'+shape+' arcade-'+skin;
+   if(el.className!==cls)el.className=cls;
+   el.hidden=false;
+   el.style.left=(x/360*100)+'%';el.style.top=(y/480*100)+'%';
+   el.style.width=(w/360*100)+'%';el.style.height=(h/480*100)+'%';
+  });
+  // Keep the small sprite pool for reuse; hide any unused segments after line clears.
+  for(let i=cells.length;i<characterSprites.length;i++)characterSprites[i].hidden=true;
+ }
  const listen=(el,type,fn,opt)=>{el.addEventListener(type,fn,opt);remove.push(()=>el.removeEventListener(type,fn,opt));};
  const points=n=>{score+=n;onScore(score);};const end=()=>{if(!alive)return;api.stop();queueMicrotask(onEnd);};
- let bird=210,velocity=0,pipes=[],pipeTimer=0;
+ // Flight difficulty ramps smoothly with score, capped at 60 cleared pipes.
+ const flightGapHalf=54,flightGravity=910;
+ let bird=210,velocity=0,pipes=[],pipeTravel=0,flightDifficulty=0,lastGapCenter=null,lastGapDrift=0,calmPipes=0;
+ function nextFlightGap(){
+  const minY=90-10*flightDifficulty,maxY=390+10*flightDifficulty;
+  const maxJump=280+20*flightDifficulty,driftLimit=70+25*flightDifficulty;
+  if(lastGapCenter===null)return lastGapCenter=170+Math.random()*140;
+  // Flow through nearby heights, with a short recovery between dramatic jumps.
+  const dramatic=calmPipes>=2&&Math.random()<.18+.22*flightDifficulty;
+  if(dramatic){
+   const minStep=Math.min(190+25*flightDifficulty,Math.max(lastGapCenter-minY,maxY-lastGapCenter)-15);
+   const ranges=[[Math.max(minY,lastGapCenter-maxJump),lastGapCenter-minStep],
+                 [lastGapCenter+minStep,Math.min(maxY,lastGapCenter+maxJump)]]
+     .filter(([lo,hi])=>hi>lo);
+   let pick=Math.random()*ranges.reduce((sum,[lo,hi])=>sum+hi-lo,0);
+   let target=ranges[ranges.length-1][1];
+   for(const [lo,hi] of ranges){if(pick<hi-lo){target=lo+pick;break;}pick-=hi-lo;}
+   lastGapDrift=0;calmPipes=0;
+   return lastGapCenter=target;
+  }
+  calmPipes++;
+  lastGapDrift=Math.max(-driftLimit,Math.min(driftLimit,lastGapDrift*.65+(Math.random()-.5)*(90+35*flightDifficulty)));
+  let target=lastGapCenter+lastGapDrift;
+  if(target<minY){target=2*minY-target;lastGapDrift=Math.abs(lastGapDrift)*.5;}
+  if(target>maxY){target=2*maxY-target;lastGapDrift=-Math.abs(lastGapDrift)*.5;}
+  return lastGapCenter=target;
+ }
+
  let snake=[{x:8,y:10},{x:7,y:10},{x:6,y:10}],direction={x:1,y:0},pending=direction,turned=false,food={x:12,y:10};
  const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
  let board=Array.from({length:20},()=>Array(10).fill(0)),piece=null,px=3,py=0,bag=[];
@@ -1451,9 +1565,9 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  ag('arcadeControls').replaceChildren();controls.forEach(([a,label])=>{const b=document.createElement('button');b.className='nav-btn';b.textContent=label;b.setAttribute('aria-label',a==='up'&&kind==='blocks'?'Rotate':a);ag('arcadeControls').append(b);listen(b,'pointerdown',e=>{e.preventDefault();action(a);});listen(b,'click',e=>{if(e.detail===0)action(a);});});
  listen(document,'keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;const a={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',' ':'drop'}[e.key];if(a){e.preventDefault();action(a);}});
  let touch=null;listen(canvas,'pointerdown',e=>{e.preventDefault();if(kind==='flap')action('flap');else{touch={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});listen(canvas,'pointerup',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;touch=null;if(Math.max(Math.abs(dx),Math.abs(dy))<12)return;action(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up');});
- function update(dt){elapsed+=dt;if(arcadeNow()>=closes||elapsed>=600){end();return;}if(kind==='flap'){velocity+=760*dt;bird+=velocity*dt;pipeTimer+=dt;if(pipeTimer>=1.8){pipeTimer=0;pipes.push({x:380,gap:95+Math.random()*220,passed:false});}for(const p of pipes){p.x-=145*dt;if(!p.passed&&p.x+48<82){p.passed=true;points(1);}if(p.x<94&&p.x+48>70&&(bird-12<p.gap-80||bird+12>p.gap+80))end();}pipes=pipes.filter(p=>p.x>-60);if(bird<12||bird>468)end();}else if(kind==='snake'){acc+=dt;if(acc>=Math.max(.09,.17-score*.0002)){acc=0;direction=pending;turned=false;const head={x:snake[0].x+direction.x,y:snake[0].y+direction.y},eat=head.x===food.x&&head.y===food.y;if(head.x<0||head.x>=18||head.y<0||head.y>=24||snake.slice(0,eat?snake.length:-1).some(p=>p.x===head.x&&p.y===head.y)){end();return;}snake.unshift(head);if(eat){points(10);const free=[];for(let y=0;y<24;y++)for(let x=0;x<18;x++)if(!snake.some(p=>p.x===x&&p.y===y))free.push({x,y});if(!free.length){end();return;}food=free[Math.floor(Math.random()*free.length)];}else snake.pop();}}else{acc+=dt;if(acc>=Math.max(.14,.65-score/12000)){acc=0;drop();}}}
- function draw(){ctx.fillStyle='#141c2d';ctx.fillRect(0,0,360,480);if(kind==='flap'){ctx.fillStyle='#598679';for(const p of pipes){ctx.fillRect(p.x,0,48,p.gap-80);ctx.fillRect(p.x,p.gap+80,48,480);}ctx.fillStyle='#edbd61';ctx.beginPath();ctx.arc(82,bird,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#141c2d';ctx.fillRect(86,bird-5,4,4);}else if(kind==='snake'){ctx.fillStyle='#edbd61';ctx.fillRect(food.x*20+2,food.y*20+2,16,16);snake.forEach((p,i)=>{ctx.fillStyle=i?'#81b8a4':'#e2f0e9';ctx.fillRect(p.x*20+1,p.y*20+1,18,18);});}else{ctx.strokeStyle='#ffffff0c';for(let x=0;x<=10;x++){ctx.beginPath();ctx.moveTo(60+x*24,0);ctx.lineTo(60+x*24,480);ctx.stroke();}function cell(x,y,color){ctx.fillStyle=color;ctx.fillRect(60+x*24+1,y*24+1,22,22);}board.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(x,y,'#699a8c');}));piece.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(px+x,py+y,'#edbd61');}));}}
- function frame(t){if(!alive)return;const dt=last?Math.min((t-last)/1000,.04):0;last=t;update(dt);draw();if(alive)raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);return api;
+ function update(dt){elapsed+=dt;if(arcadeNow()>=closes||elapsed>=600){end();return;}if(kind==='flap'){flightDifficulty+=(Math.min(score/60,1)-flightDifficulty)*(1-Math.exp(-dt/2));const pipeSpeed=145+65*flightDifficulty;velocity+=flightGravity*dt;bird+=velocity*dt;pipeTravel+=pipeSpeed*dt;if(pipeTravel>=261){pipeTravel-=261;const gapCenter=nextFlightGap();pipes.push({x:380+pipeSpeed*dt-pipeTravel,gap:gapCenter,passed:false});}for(const p of pipes){p.x-=pipeSpeed*dt;if(!p.passed&&p.x+48<82){p.passed=true;points(1);}if(p.x<94&&p.x+48>70&&(bird-12<p.gap-flightGapHalf||bird+12>p.gap+flightGapHalf))end();}pipes=pipes.filter(p=>p.x>-60);if(bird<12||bird>468)end();}else if(kind==='snake'){acc+=dt;if(acc>=Math.max(.09,.17-score*.0002)){acc=0;direction=pending;turned=false;const head={x:snake[0].x+direction.x,y:snake[0].y+direction.y},eat=head.x===food.x&&head.y===food.y;if(head.x<0||head.x>=18||head.y<0||head.y>=24||snake.slice(0,eat?snake.length:-1).some(p=>p.x===head.x&&p.y===head.y)){end();return;}snake.unshift(head);if(eat){points(10);const free=[];for(let y=0;y<24;y++)for(let x=0;x<18;x++)if(!snake.some(p=>p.x===x&&p.y===y))free.push({x,y});if(!free.length){end();return;}food=free[Math.floor(Math.random()*free.length)];}else snake.pop();}}else{acc+=dt;if(acc>=Math.max(.14,.65-score/12000)){acc=0;drop();}}}
+ function draw(){ctx.fillStyle='#141c2d';ctx.fillRect(0,0,360,480);if(kind==='flap'){ctx.fillStyle='#598679';for(const p of pipes){ctx.fillRect(p.x,0,48,p.gap-flightGapHalf);ctx.fillRect(p.x,p.gap+flightGapHalf,48,480);}ctx.fillStyle='#edbd61';ctx.beginPath();ctx.arc(82,bird,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#141c2d';ctx.fillRect(86,bird-5,4,4);}else if(kind==='snake'){ctx.fillStyle='#edbd61';ctx.fillRect(food.x*20+2,food.y*20+2,16,16);snake.forEach((p,i)=>{ctx.fillStyle=i?'#81b8a4':'#e2f0e9';ctx.fillRect(p.x*20+1,p.y*20+1,18,18);});}else{ctx.strokeStyle='#ffffff0c';for(let x=0;x<=10;x++){ctx.beginPath();ctx.moveTo(60+x*24,0);ctx.lineTo(60+x*24,480);ctx.stroke();}function cell(x,y,color){ctx.fillStyle=color;ctx.fillRect(60+x*24+1,y*24+1,22,22);}board.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(x,y,'#699a8c');}));piece.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(px+x,py+y,'#edbd61');}));}}
+ function frame(t){if(!alive)return;const dt=last?Math.min((t-last)/1000,.04):0;last=t;update(dt);draw();drawCharacterSkins();drawCharacterCrown();if(alive)raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);return api;
 }
 async function loadArcadeStats(){if(!adminLoggedIn)return;const target=ag('arcadeStatsBody');target.textContent='Loading game statistics…';try{if(!arcadeUser)throw new Error('Sign in to your game-admin account in the Games tab, then return here.');const week=ag('arcadeStatsWeek').value||undefined,data=await arcadeCall('Stats',{week}),players=data.players.sort((a,b)=>b.starts-a.starts||b.seconds-a.seconds);ag('arcadeStatsWeek').value=data.week;const sum=k=>players.reduce((n,p)=>n+(p[k]||0),0);ag('arcadeMetrics').innerHTML=[['Players',players.length],['Rounds started',sum('starts')],['Rounds completed',sum('completed')],['Minutes played',Math.round(sum('seconds')/60)]].map(([label,n])=>'<div class="arcade-metric"><strong>'+n+'</strong>'+label+'</div>').join('');ag('arcadeStatsLeaders').textContent=players.length?'Most rounds: '+players[0].name+' ('+players[0].starts+'). Most time: '+[...players].sort((a,b)=>b.seconds-a.seconds)[0].name+'.':'';target.innerHTML=players.length?'<div class="arcade-table-scroll"><table class="lb-table"><thead><tr><th>Player</th><th>Starts</th><th>Finished</th><th>Minutes</th><th>Best</th><th>Avg score</th></tr></thead><tbody>'+players.map(p=>'<tr><td>'+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.starts+'</td><td>'+p.completed+'</td><td>'+(p.seconds/60).toFixed(1)+'</td><td>'+p.best+'</td><td>'+ (p.completed?Math.round(p.totalScore/p.completed):'—')+'</td></tr>').join('')+'</tbody></table></div>':'No play recorded for this week.';}catch(e){ag('arcadeMetrics').replaceChildren();ag('arcadeStatsLeaders').textContent='';target.textContent=arcadeError(e);}}
 
