@@ -672,7 +672,7 @@
 #view-game .arcade-all-odds{border:1px solid #2d4058;border-radius:9px;background:#0e1929;padding:0 10px;margin-top:14px}#view-game .arcade-all-odds>summary{font-size:11px;color:#a9bfd9;padding:12px 0}
 #view-game .arcade-odds{grid-template-columns:1fr;max-height:340px;overflow-y:auto}#view-game .arcade-odds-item{padding:6px;border-bottom:1px solid #223349;font-size:11px;color:#bdd0e5}
 #view-game .lb-table{width:100%;border-collapse:collapse}#view-game .lb-table th{font-size:9px;letter-spacing:1px;color:#7f96b4;background:#0e1a2b;text-transform:uppercase;padding:12px 10px;border-color:#27394f}#view-game .lb-table td{padding:8px 10px;color:#c3d2e5;border-bottom:1px solid #25354b;font-size:12px}#view-game .lb-table td:last-child{font-size:17px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:#e5cc9a}#view-game .lb-table th:last-child{text-align:right}
-#view-game .lb-table td:first-child{font-size:12px;color:#7e94af;width:30px}#view-game .lb-table tr:nth-child(-n+3) td{background:#28344830}#view-game .lb-table .arcade-name{font-size:12px}.arcade-lb-level{font-size:10px;color:#7f96b4;background:#0e1a2b;border:1px solid #27394f;border-radius:100px;padding:2px 8px;margin-left:4px;white-space:nowrap}
+#view-game .lb-table td:first-child{font-size:12px;color:#7e94af;width:30px}#view-game .lb-table tr:nth-child(-n+3) td{background:#28344830}#view-game .lb-table .arcade-name{font-size:12px}
 #view-game .arcade-leader-character{animation:none}
 @media(max-width:850px){#view-game .arcade{grid-template-columns:1fr;grid-template-areas:"hero" "hours" "notice" "auth" "challenge" "profile" "board";padding:16px;border-radius:20px}#view-game .arcade-hero{padding:24px;min-height:280px}.arcade-hero-art{width:38%}.arcade-hero-bird-front{width:140px;height:127px;left:0}.arcade-hero-bird-back{width:110px;height:100px;left:30%}#view-game .arcade-card{padding:20px}#view-game .arcade-wheel-offer{flex-wrap:nowrap}#view-game .arcade-token-offer{width:auto;display:block}#view-game .arcade-token-offer span{margin-top:7px}}
 @media(max-width:480px){#view-game{padding:12px 6px 30px}#view-game .arcade{padding:12px;gap:13px}#view-game .arcade-hero{padding:22px 18px;min-height:300px}#view-game .arcade-hero-copy{max-width:100%}#view-game .arcade-hero h1{font-size:33px;letter-spacing:-1.2px}.arcade-hero-art{opacity:.2;width:55%;pointer-events:none}.arcade-hero-caption{display:none}#view-game .arcade-hero p{font-size:12px;max-width:230px}.arcade-perks{max-width:240px;font-size:9px}#view-game .arcade-card{padding:16px}#view-game .arcade h2{font-size:18px}#view-game .arcade-wheel-offer{flex-wrap:wrap}#view-game .arcade-token-offer{width:100%;display:flex}#view-game .arcade-token-offer span{margin:0}#view-game #arcadeAuthForm{grid-template-columns:1fr}#view-game .lb-table td{padding:7px 5px}#view-game .lb-table .arcade-name{font-size:11px}#view-game .arcade-leader-character{margin-right:2px;width:51px}#view-game .arcade-player-metric strong{font-size:18px}#view-game .arcade-ready{min-height:310px}}
@@ -1565,7 +1565,7 @@ function arcadeScheduleAt(now,isAdmin){
 }
 async function arcadeCheckAdmin(uid){try{const doc=await arcadeStore.collection('sparkArcadeAdmins').doc(uid).get({source:'server'});return doc.exists&&doc.data().enabled===true;}catch(e){return false;}}
 function arcadePublicProfile(p){return {...p,level:1+Math.floor(p.xp/100),spins:Math.floor(p.xp/100)-p.usedSpins};}
-function arcadeWriteMirrors(tx,uid,p){if(!p.week)return;tx.set(arcadeStatsRef(p.week,uid),{...p.stats,name:p.name,equipped:p.equipped});tx.set(arcadeBoardRef(p.week,uid),{name:p.name,equipped:p.equipped,score:p.stats.best,xp:p.xp});}
+function arcadeWriteMirrors(tx,uid,p){if(!p.week)return;tx.set(arcadeStatsRef(p.week,uid),{...p.stats,name:p.name,equipped:p.equipped});tx.set(arcadeBoardRef(p.week,uid),{name:p.name,equipped:p.equipped,score:p.stats.best});}
 async function arcadeCall(name,data={}){
  if(name==='Status'){const snap=await db.ref('.info/serverTimeOffset').once('value');arcadeOffset=Number(snap.val())||0;arcadeIsAdmin=arcadeAuth.currentUser?await arcadeCheckAdmin(arcadeAuth.currentUser.uid):false;return arcadeScheduleAt(arcadeNow(),arcadeIsAdmin);}
  if(name==='Board'){const s=arcadeScheduleAt(arcadeNow()),snap=await arcadeStore.collection('sparkArcadeBoards').doc(s.key).collection('players').orderBy('score','desc').limit(50).get({source:'server'});return {week:s.week,players:snap.docs.map(d=>({id:d.id,...d.data()}))};}
@@ -1586,7 +1586,7 @@ async function arcadeCall(name,data={}){
    const previousBest=Math.max(record.exists?record.data().score:0,leader?.exists?leader.data().score:0);
    const seconds=Math.max(0,Math.floor((arcadeNow()-p.active.started.toMillis())/1000)),score=data.score;
    if(seconds>605||!Number.isSafeInteger(score)||score<0)arcadeFail('This round could not be saved.');
-   const highScoreBonus=score>previousBest?100:0,baseEarned=seconds>=10?Math.round(score*0.625):0;
+   const highScoreBonus=score>previousBest?100:0,baseEarned=seconds>=10?Math.min(25,5+Math.floor(seconds/10)):0;
    const earned=baseEarned+highScoreBonus,xp=p.xp+earned;
    const result={id:data.id,score,seconds,earned,levels:Math.floor(xp/100)-Math.floor(p.xp/100),highScoreBonus};
    const next={...p,xp,active:null,lastResult:result,stats:{...p.stats,completed:p.stats.completed+1,seconds:p.stats.seconds+seconds,best:Math.max(p.stats.best,score),totalScore:p.stats.totalScore+score},updated:arcadeStamp()};
@@ -1635,7 +1635,7 @@ function arcadeLeaderboardCharacter(rank,color,week){
 function arcadeCurrentCrownRank(){return arcadeCrownWeek===arcadeScheduleAt(arcadeNow()).key?arcadeCrownRanks.get(arcadeUser?.uid)||0:0;}
 function arcadeApplyBoard(players,week){
  arcadeCrownWeek=week;arcadeCrownRanks=new Map(players.slice(0,3).map((p,i)=>[p.id,i+1]));
- ag('gameLbBody').innerHTML=players.length?players.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+arcadeLeaderboardCharacter(i+1,p.equipped,week)+arcadeNameHTML(p.name,p.equipped)+' <span class="arcade-lb-level">Lv '+(1+Math.floor((p.xp||0)/100))+'</span></td><td>'+p.score+'</td></tr>').join(''):'<tr><td colspan="3">No scores yet this week. Be the first to play.</td></tr>';
+ ag('gameLbBody').innerHTML=players.length?players.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+arcadeLeaderboardCharacter(i+1,p.equipped,week)+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.score+'</td></tr>').join(''):'<tr><td colspan="3">No scores yet this week. Be the first to play.</td></tr>';
 }
 function arcadeNameHTML(name,color){return '<span class="arcade-name arcade-'+(arcadeColorIds.includes(color)?color:'default')+'">'+escapeHtml(name)+'</span>';}
 function arcadeNow(){return Date.now()+arcadeOffset;}
