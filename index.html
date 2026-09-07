@@ -1419,6 +1419,21 @@ async function arcadeCall(name,data={}){
  if(name==='Finish'){const isAdmin=await arcadeCheckAdmin(uid);return arcadeStore.runTransaction(async tx=>{const p=(await tx.get(ref)).data();if(p?.lastResult?.id===data.id)return p.lastResult;if(!p?.active||p.active.id!==data.id)arcadeFail('This round is no longer active.');const s=arcadeScheduleAt(arcadeNow(),isAdmin);if(!s.open||p.week!==s.key)arcadeFail('The weekly challenge has closed.');const seconds=Math.max(0,Math.floor((arcadeNow()-p.active.started.toMillis())/1000)),score=data.score;if(seconds>605||!Number.isSafeInteger(score)||score<0)arcadeFail('This round could not be saved.');const earned=seconds>=10?Math.min(25,5+Math.floor(seconds/10)):0,xp=p.xp+earned,result={id:data.id,score,seconds,earned,levels:Math.floor(xp/100)-Math.floor(p.xp/100)};const next={...p,xp,active:null,lastResult:result,stats:{...p.stats,completed:p.stats.completed+1,seconds:p.stats.seconds+seconds,best:Math.max(p.stats.best,score),totalScore:p.stats.totalScore+score},updated:arcadeStamp()};tx.set(ref,next);arcadeWriteMirrors(tx,uid,next);return result;});}
  if(name==='Spin'){const id=String(data.requestId||'');if(!/^[a-zA-Z0-9-]{10,80}$/.test(id))arcadeFail('Missing spin identifier.');const receipt=ref.collection('spins').doc(id);return arcadeStore.runTransaction(async tx=>{const old=await tx.get(receipt);if(old.exists)return old.data();const p=(await tx.get(ref)).data();if(!p||p.usedSpins>=Math.floor(p.xp/100))arcadeFail('Level up to earn a spin.');const reward=arcadeRandomReward(),duplicate=p.owned.includes(reward),result={id,reward,duplicate};tx.update(ref,{usedSpins:p.usedSpins+1,owned:duplicate?p.owned:[...p.owned,reward],lastSpin:result,updated:arcadeStamp()});tx.set(receipt,result);return result;});}
  if(name==='Equip'){await arcadeStore.runTransaction(async tx=>{const p=(await tx.get(ref)).data();if(!p?.owned.includes(data.color))arcadeFail('Unlock this color first.');const next={...p,equipped:data.color,updated:arcadeStamp()};tx.set(ref,next);arcadeWriteMirrors(tx,uid,next);});return {ok:true};}
+ if(name==='AwardXP'){
+  if(!adminLoggedIn)arcadeFail('Open the password-protected Admin tab first.');
+  if(!await arcadeCheckAdmin(uid))arcadeFail('Sign in to your game-admin account in Games, then return to Admin.');
+  const amount=Number(data.amount),id=String(data.requestId||'');
+  if(!Number.isSafeInteger(amount)||amount<1||amount>100000)arcadeFail('Enter a whole number from 1 to 100,000 XP.');
+  if(!/^[a-zA-Z0-9-]{10,80}$/.test(id))arcadeFail('Missing award identifier.');
+  const playerRef=arcadeProfileRef(data.uid),receipt=playerRef.collection('xpAwards').doc(id);
+  return arcadeStore.runTransaction(async tx=>{
+   const existing=await tx.get(receipt);if(existing.exists)return existing.data();
+   const snap=await tx.get(playerRef);if(!snap.exists)arcadeFail('This player has no game profile.');
+   const p=snap.data(),xp=p.xp+amount;if(!Number.isSafeInteger(xp))arcadeFail('This award exceeds the XP limit.');
+   const award={amount,adminUid:uid,beforeXP:p.xp,afterXP:xp,created:arcadeStamp()};
+   tx.update(playerRef,{xp,updated:arcadeStamp()});tx.set(receipt,award);return award;
+  });
+ }
  if(name==='Stats'){const admin=await arcadeStore.collection('sparkArcadeAdmins').doc(uid).get({source:'server'});if(!admin.exists||admin.data().enabled!==true)arcadeFail('This game account has not been assigned game-admin access.');const week=data.week||arcadeScheduleAt(arcadeNow()).week,ms=Date.parse(week+'T00:00:00Z');if(!/^\d{4}-\d{2}-\d{2}$/.test(week)||!Number.isFinite(ms)||new Date(ms).getUTCDay()!==1)arcadeFail('Choose a Monday.');let players=[],last=null;do{let q=arcadeStore.collection('sparkArcadeWeeks').doc(String(ms)).collection('players').orderBy(firebase.firestore.FieldPath.documentId()).limit(200);if(last)q=q.startAfter(last);const snap=await q.get({source:'server'});players.push(...snap.docs.map(d=>({id:d.id,...d.data()})));last=snap.size===200?snap.docs.at(-1):null;}while(last);return {week,players};}
  arcadeFail('Unknown game action.');
 }
@@ -1569,7 +1584,31 @@ function createArcadeEngine(kind,onScore,onEnd,closes){
  function draw(){ctx.fillStyle='#141c2d';ctx.fillRect(0,0,360,480);if(kind==='flap'){ctx.fillStyle='#598679';for(const p of pipes){ctx.fillRect(p.x,0,48,p.gap-flightGapHalf);ctx.fillRect(p.x,p.gap+flightGapHalf,48,480);}ctx.fillStyle='#edbd61';ctx.beginPath();ctx.arc(82,bird,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#141c2d';ctx.fillRect(86,bird-5,4,4);}else if(kind==='snake'){ctx.fillStyle='#edbd61';ctx.fillRect(food.x*20+2,food.y*20+2,16,16);snake.forEach((p,i)=>{ctx.fillStyle=i?'#81b8a4':'#e2f0e9';ctx.fillRect(p.x*20+1,p.y*20+1,18,18);});}else{ctx.strokeStyle='#ffffff0c';for(let x=0;x<=10;x++){ctx.beginPath();ctx.moveTo(60+x*24,0);ctx.lineTo(60+x*24,480);ctx.stroke();}function cell(x,y,color){ctx.fillStyle=color;ctx.fillRect(60+x*24+1,y*24+1,22,22);}board.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(x,y,'#699a8c');}));piece.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(px+x,py+y,'#edbd61');}));}}
  function frame(t){if(!alive)return;const dt=last?Math.min((t-last)/1000,.04):0;last=t;update(dt);draw();drawCharacterSkins();drawCharacterCrown();if(alive)raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);return api;
 }
-async function loadArcadeStats(){if(!adminLoggedIn)return;const target=ag('arcadeStatsBody');target.textContent='Loading game statistics…';try{if(!arcadeUser)throw new Error('Sign in to your game-admin account in the Games tab, then return here.');const week=ag('arcadeStatsWeek').value||undefined,data=await arcadeCall('Stats',{week}),players=data.players.sort((a,b)=>b.starts-a.starts||b.seconds-a.seconds);ag('arcadeStatsWeek').value=data.week;const sum=k=>players.reduce((n,p)=>n+(p[k]||0),0);ag('arcadeMetrics').innerHTML=[['Players',players.length],['Rounds started',sum('starts')],['Rounds completed',sum('completed')],['Minutes played',Math.round(sum('seconds')/60)]].map(([label,n])=>'<div class="arcade-metric"><strong>'+n+'</strong>'+label+'</div>').join('');ag('arcadeStatsLeaders').textContent=players.length?'Most rounds: '+players[0].name+' ('+players[0].starts+'). Most time: '+[...players].sort((a,b)=>b.seconds-a.seconds)[0].name+'.':'';target.innerHTML=players.length?'<div class="arcade-table-scroll"><table class="lb-table"><thead><tr><th>Player</th><th>Starts</th><th>Finished</th><th>Minutes</th><th>Best</th><th>Avg score</th></tr></thead><tbody>'+players.map(p=>'<tr><td>'+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.starts+'</td><td>'+p.completed+'</td><td>'+(p.seconds/60).toFixed(1)+'</td><td>'+p.best+'</td><td>'+ (p.completed?Math.round(p.totalScore/p.completed):'—')+'</td></tr>').join('')+'</tbody></table></div>':'No play recorded for this week.';}catch(e){ag('arcadeMetrics').replaceChildren();ag('arcadeStatsLeaders').textContent='';target.textContent=arcadeError(e);}}
+async function loadArcadeStats(){if(!adminLoggedIn)return;const target=ag('arcadeStatsBody');target.textContent='Loading game statistics…';try{if(!arcadeUser)throw new Error('Sign in to your game-admin account in the Games tab, then return here.');const week=ag('arcadeStatsWeek').value||undefined,data=await arcadeCall('Stats',{week}),players=data.players.sort((a,b)=>b.starts-a.starts||b.seconds-a.seconds);ag('arcadeStatsWeek').value=data.week;const sum=k=>players.reduce((n,p)=>n+(p[k]||0),0);ag('arcadeMetrics').innerHTML=[['Players',players.length],['Rounds started',sum('starts')],['Rounds completed',sum('completed')],['Minutes played',Math.round(sum('seconds')/60)]].map(([label,n])=>'<div class="arcade-metric"><strong>'+n+'</strong>'+label+'</div>').join('');ag('arcadeStatsLeaders').textContent=players.length?'Most rounds: '+players[0].name+' ('+players[0].starts+'). Most time: '+[...players].sort((a,b)=>b.seconds-a.seconds)[0].name+'.':'';target.innerHTML=players.length?'<div class="arcade-table-scroll"><table class="lb-table"><thead><tr><th>Player</th><th>Starts</th><th>Finished</th><th>Minutes</th><th>Best</th><th>Avg score</th></tr></thead><tbody>'+players.map(p=>'<tr><td>'+arcadeNameHTML(p.name,p.equipped)+'</td><td>'+p.starts+'</td><td>'+p.completed+'</td><td>'+(p.seconds/60).toFixed(1)+'</td><td>'+p.best+'</td><td>'+ (p.completed?Math.round(p.totalScore/p.completed):'—')+'</td></tr>').join('')+'</tbody></table></div>':'No play recorded for this week.';;if(players.length){
+ const heading=document.createElement('th');heading.textContent='Award XP';target.querySelector('thead tr').append(heading);
+ target.querySelectorAll('tbody tr').forEach((row,i)=>{
+  const player=players[i],cell=document.createElement('td'),form=document.createElement('form'),input=document.createElement('input'),button=document.createElement('button'),status=document.createElement('div');
+  input.type='number';input.min='1';input.max='100000';input.step='1';input.required=true;input.placeholder='XP amount';input.style.width='110px';input.setAttribute('aria-label','XP to award to '+player.name);
+  button.type='submit';button.className='nav-btn';button.textContent='Add XP';status.setAttribute('role','status');
+  const storageKey='arcadeXPAward:'+arcadeUser.uid+':'+player.id;
+  let pending=null;try{pending=JSON.parse(sessionStorage.getItem(storageKey)||'null');}catch(e){}
+  if(pending){input.value=pending.amount;input.disabled=true;button.textContent='Retry award';status.textContent='A previous award needs confirmation. Retry will not add it twice.';}
+  form.onsubmit=async e=>{
+   e.preventDefault();if(button.disabled||!form.reportValidity())return;
+   pending=pending||{uid:player.id,amount:Number(input.value),requestId:crypto.randomUUID()};
+   button.disabled=true;input.disabled=true;status.textContent='Adding XP…';
+   try{
+    sessionStorage.setItem(storageKey,JSON.stringify(pending));
+    const result=await arcadeCall('AwardXP',pending);
+    pending=null;sessionStorage.removeItem(storageKey);input.value='';
+    status.textContent='Added '+result.amount+' XP to '+player.name+' · Lifetime XP: '+result.afterXP;
+    if(player.id===arcadeUser.uid)arcadeLoadProfile().catch(()=>{});
+   }catch(error){status.textContent=(String(error.code||'').includes('permission-denied')?'Firebase blocked this award. Publish the admin XP rules addition, then retry.':arcadeError(error))+' Retry checks the same award without adding it twice.';}
+   finally{button.disabled=false;input.disabled=!!pending;button.textContent=pending?'Retry award':'Add XP';}
+  };
+  form.append(input,button,status);cell.append(form);row.append(cell);
+ });
+}}catch(e){ag('arcadeMetrics').replaceChildren();ag('arcadeStatsLeaders').textContent='';target.textContent=arcadeError(e);}}
 
 </script>
 </body>
