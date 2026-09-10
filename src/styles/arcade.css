@@ -1,0 +1,4 @@
+/* Eagle retains the Fire inventory ID for existing owners. */
+.arcade-fire{color:#f1f5f9;-webkit-text-fill-color:currentColor;animation:none!important}
+.arcade-name.arcade-fire{background:none!important;color:#f1f5f9!important;-webkit-text-fill-color:#f1f5f9!important;text-shadow:none!important}
+.arcade-bird-art.arcade-fire{background-image:url("../assets/bird-fire.webp")!important;background-size:125% auto!important;background-position:center!important;background-repeat:no-repeat!important;background-color:transparent!important;animation:none!important;mix-blend-mode:normal!important}

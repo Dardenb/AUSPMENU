@@ -1,0 +1,152 @@
+/* Skin expansion: original IDs and original Aurora/Galaxy styling retained. */
+.arcade-name{font-weight:700}
+.arcade-aurora,.arcade-galaxy{background-clip:text;-webkit-background-clip:text;color:transparent;background-size:250% 100%;animation:arcadeShimmer 4s linear infinite}
+.arcade-aurora{background-image:linear-gradient(110deg,#157b64,#2452a1,#923a90,#157b64)}
+.arcade-galaxy{background-image:linear-gradient(110deg,#311362,#a627a9,#165ca9,#6740ba,#311362);text-shadow:0 0 10px #8060ad33}
+@keyframes arcadeShimmer{to{background-position:250% 0}}
+.arcade-red{color:#b92832;--skin-solid:#b92832}
+.arcade-yellow{color:#c29700;--skin-solid:#c29700}
+.arcade-blue{color:#235da8;--skin-solid:#235da8}
+.arcade-green{color:#277039;--skin-solid:#277039}
+.arcade-orange{color:#c15a13;--skin-solid:#c15a13}
+.arcade-purple{color:#793db5;--skin-solid:#793db5}
+.arcade-pink{color:#c62c7c;--skin-solid:#c62c7c}
+.arcade-teal{color:#087c80;--skin-solid:#087c80}
+.arcade-gold{color:#936200;--skin-solid:#936200}
+.arcade-beer,.arcade-pi,.arcade-water,.arcade-fire,.arcade-marble,.arcade-carbon,.arcade-tidal,.arcade-inferno,.arcade-supernova,.arcade-liquidgold{color:transparent;-webkit-text-fill-color:transparent;background-clip:text;-webkit-background-clip:text;box-decoration-break:clone}
+.arcade-beer{background-image:linear-gradient(to bottom,#fff2c6 0 17%,transparent 30%),radial-gradient(circle at 30% 65%,#ffeaae 0 1px,transparent 2px),radial-gradient(circle at 75% 42%,#fff4c4 0 1px,transparent 2px),linear-gradient(#f5be36,#bf6506);background-size:100% 100%,13px 19px,19px 23px,100% 100%}
+.arcade-water,.arcade-tidal{background-image:repeating-radial-gradient(ellipse at 25% 120%,transparent 0 5px,#99e6f3 6px 7px,transparent 9px 15px),linear-gradient(120deg,#075b94,#2696bd,#113e7b);background-size:48px 30px,200% 100%}
+.arcade-fire,.arcade-inferno{background-image:radial-gradient(ellipse at 20% 110%,#ffe17b 0 19%,#ffab21 24%,transparent 55%),radial-gradient(ellipse at 70% 115%,#ffe981 0 15%,#f68519 27%,transparent 55%),linear-gradient(#a22216,#ed5118);background-size:23px 100%,31px 100%,100% 100%}
+.arcade-marble{background-image:repeating-linear-gradient(132deg,transparent 0 9px,#6e7c91 10px,transparent 12px 24px),linear-gradient(25deg,#8b96a6,#e5e9ed,#798da5);background-size:70px 40px,100% 100%}
+.arcade-carbon{background-image:repeating-conic-gradient(#1d2632 0% 25%,#596474 0% 50%);background-size:7px 7px}
+.arcade-tidal{animation:arcadeTide 5s linear infinite}
+.arcade-inferno{animation:arcadeFlame 3s ease-in-out infinite alternate}
+.arcade-supernova{background-image:radial-gradient(circle,#fff 0 1px,transparent 1.7px),linear-gradient(110deg,#252069,#d0399f,#167ca3,#252069);background-size:17px 21px,300% 100%;animation:arcadeCosmos 7s linear infinite}
+.arcade-liquidgold{background-image:repeating-linear-gradient(110deg,#70410c 0%,#d8a437 15%,#fff2aa 24%,#a36c15 32%,#f7d16c 43%,#70410c 50%);background-size:300% 100%;animation:arcadeGilt 6s linear infinite}
+@keyframes arcadeTide{to{background-position:48px 0,100% 0}}
+@keyframes arcadeFlame{to{background-position:7px -9px,-5px -13px,0 0}}
+@keyframes arcadeCosmos{to{background-position:17px -21px,100% 0}}
+@keyframes arcadeGilt{to{background-position:150% 0}}
+.arcade-wheel-wrap{position:relative;width:min(100%,320px);aspect-ratio:1;margin:28px auto}
+.arcade-pointer{position:absolute;z-index:3;top:-20px;left:50%;transform:translateX(-50%);font-size:28px;color:#1a1612;line-height:1;text-shadow:0 1px white;pointer-events:none}
+#arcadeWheel{position:absolute;inset:0;height:auto;border:6px solid #e8c07a;border-radius:50%;background:#ddd;display:block;overflow:hidden;transition:transform 8s cubic-bezier(.22,.65,.12,1)}
+#arcadeWheel .arcade-slice{position:absolute;inset:0;background-clip:border-box;-webkit-background-clip:border-box;background-color:var(--skin-solid,transparent);text-shadow:none}
+.arcade-wheel-hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;width:76px;height:76px;display:grid;place-content:center;text-align:center;background:#fffdf9;color:#1a1612;font:700 12px/1.3 sans-serif;box-shadow:0 2px 12px #0003;pointer-events:none}
+.arcade-odds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:16px 0}
+.arcade-odds-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.arcade-swatch{display:inline-block;width:22px;height:22px;flex-shrink:0;border-radius:5px;background-clip:border-box;-webkit-background-clip:border-box;background-color:var(--skin-solid,transparent)}
+@media(prefers-reduced-motion:reduce){.arcade-name,.arcade-slice,.arcade-swatch{animation:none!important}#arcadeWheel{transition:none}}
+.arcade-pi{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23392057%22/%3E%3Ctext%20x%3D%223%22%20y%3D%2219%22%20font-family%3D%22Georgia%2Cserif%22%20font-weight%3D%22bold%22%20font-size%3D%2221%22%20fill%3D%22%23edc868%22%3E%CF%80%3C/text%3E%3C/svg%3E");background-size:24px 24px}
+
+/* Game characters share the exact CSS textures used by names and the wheel. */
+.arcade-stage{position:relative;width:100%;max-width:360px;margin:14px auto}
+#arcadeCanvasHost .arcade-stage canvas{width:100%;max-width:none;margin:0}
+.arcade-character-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:12px}
+.arcade-character{position:absolute;display:block;background-clip:border-box;-webkit-background-clip:border-box;background-color:var(--skin-solid,#edbd61);box-shadow:inset 0 0 0 1px #ffffff80;pointer-events:none}
+.arcade-character[hidden]{display:none!important}
+.arcade-character-bird{border-radius:50%}
+.arcade-character-bird::after{content:'';position:absolute;left:66.67%;top:29.17%;width:16.67%;height:16.67%;background:#141c2d;box-shadow:0 0 0 1px #fff9}
+.arcade-character-head{box-shadow:inset 0 0 0 2px #fff}
+@media(prefers-reduced-motion:reduce){.arcade-character{animation:none!important}}
+
+.arcade-crown{display:inline-block;width:24px;height:19px;vertical-align:-3px;margin-right:6px;flex-shrink:0}
+.arcade-crown svg{display:block;width:100%;height:100%;overflow:visible}
+.arcade-crown-gold{color:#e4b62d;--crown-edge:#805613}
+.arcade-crown-silver{color:#c5cedc;--crown-edge:#596b80}
+.arcade-crown-bronze{color:#bd7949;--crown-edge:#704021}
+.arcade-game-crown{position:absolute;margin:0;z-index:2;pointer-events:none}
+.arcade-game-crown[hidden]{display:none!important}
+
+/* Games-only visual refresh. Food pages keep their existing theme and layout. */
+#view-game{padding:20px 12px 48px}
+#view-game .arcade{--ink:#edf4ff;--ink-muted:#a4b3c9;--gold:#efc474;--gold-pale:#273044;--border:#2b3850;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(310px,1fr);grid-template-areas:"hero hero" "hours hours" "notice notice" "auth auth" "challenge profile" "board profile";gap:18px;background:#0b1220;border:1px solid #26344a;border-radius:28px;padding:24px;box-shadow:0 20px 70px #15213826}
+#view-game .arcade-hero{grid-area:hero;position:relative;display:flex;align-items:center;justify-content:space-between;overflow:hidden;padding:32px 30px;margin:0;min-height:290px;background:radial-gradient(ellipse at 75% 30%,#18385b 0,transparent 65%),linear-gradient(120deg,#162033,#101c2d);border:1px solid #2d415d;border-radius:20px;text-align:left}
+#view-game .arcade-hero-copy{position:relative;z-index:2;max-width:65%}
+#view-game .hero-eyebrow{display:flex;align-items:center;gap:8px;color:#82d7ec;font:700 10px/1.5 inherit;letter-spacing:2px;margin-bottom:16px}
+.arcade-status-dot{width:7px;height:7px;border-radius:50%;background:#78dcce;box-shadow:0 0 12px #78dcce80}
+#view-game .arcade-hero h1{font:800 clamp(30px,3.6vw,46px)/1.12 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-1.7px;color:#f6f8fc;margin:0 0 14px}
+#view-game .arcade-hero h1 span{color:#efc474}
+#view-game .arcade-hero p{color:#afbdd1;font-size:14px;margin:0 0 18px;line-height:1.6}
+#view-game .week-badge{display:inline-flex;max-width:100%;background:#091728;border:1px solid #34506b;color:#91e2d6;font-size:11px;line-height:1.6;letter-spacing:.3px;padding:7px 11px;border-radius:7px;white-space:normal}
+.arcade-perks{display:flex;gap:7px 16px;flex-wrap:wrap;margin-top:20px;color:#9dadc3;font-size:10px}
+.arcade-perks span:before{content:'+';color:#efc474;margin-right:6px}
+.arcade-hero-art{position:absolute;inset:0 0 0 auto;width:37%;overflow:hidden}
+.arcade-hero-orbit{position:absolute;left:0;top:10%;width:270px;height:270px;border:1px solid #4e829b40;border-radius:50%;box-shadow:0 0 0 32px #4683b50a,0 0 0 64px #4683b508}
+.arcade-hero-bird{position:absolute;width:170px;height:154px;mix-blend-mode:lighten}
+.arcade-hero-bird-front{left:8%;top:80px;transform:rotate(-10deg)}
+.arcade-hero-bird-back{left:39%;top:18px;width:140px;height:127px;transform:rotate(12deg);opacity:.8}
+.arcade-hero-caption{position:absolute;bottom:25px;left:20%;color:#7c99b2;font-size:9px;letter-spacing:3px}
+#view-game .arcade-hours{grid-area:hours;margin:0;padding:0 4px;font-size:10px;line-height:1.6;color:#8fa2bd}
+#view-game #arcadeNotice{grid-area:notice;margin:0;border-radius:12px;color:#ffe0a0;background:#423318;font-size:13px}#view-game #arcadeNotice:empty{display:none}
+#view-game #arcadeAuth{grid-area:auth}#view-game #arcadeProfile{grid-area:profile;align-self:start}#view-game #arcadeChallenge{grid-area:challenge;align-self:start}#view-game #arcadeLeaderboard{grid-area:board;align-self:start}
+#view-game .arcade-card{padding:22px;margin:0;border:1px solid #27354a;border-radius:18px;background:linear-gradient(155deg,#172235,#101a2a);box-shadow:0 8px 24px #00000012;min-width:0}
+#view-game .arcade h2{font-family:inherit;font-size:20px;line-height:1.25;letter-spacing:-.5px;color:#f0f4fc;margin:0}
+.arcade-section-label{font-size:9px;font-weight:700;letter-spacing:1.8px;color:#7d91ae;margin:0 0 15px}
+#view-game .arcade p{font-size:12px;line-height:1.7;color:#a6b6cb}
+#view-game .arcade .arcade-note{font-size:10px;line-height:1.7;color:#8d9fb8;margin:12px 0}
+#view-game .arcade-actions{gap:10px;margin:12px 0}#view-game .arcade-actions h2{flex:1}
+#view-game .arcade .nav-btn{background:#1c2b40;border:1px solid #354761;color:#c7d6e9;border-radius:9px;font-family:inherit;font-size:11px;min-height:40px;padding:8px 12px}
+#view-game .arcade .nav-btn:hover{background:#283b54;border-color:#7598b8;color:white}
+#view-game .arcade .primary-btn{background:linear-gradient(110deg,#f3d395,#e6ae51);border:1px solid #f2d393;color:#20202b;border-radius:10px;font-family:inherit;font-weight:800;font-size:12px;min-height:46px;letter-spacing:.1px;box-shadow:0 4px 16px #f0b85b12}
+#view-game .arcade button:disabled{opacity:.45;cursor:not-allowed}#view-game .arcade button:focus-visible,#view-game .arcade summary:focus-visible{outline:2px solid #7ed7ed;outline-offset:4px}
+#view-game .arcade input{background:#0c1625;color:#edf4ff;border:1px solid #35465c;border-radius:9px;padding:12px}#view-game .arcade label{color:#a3b3c9;font-size:11px}
+#view-game #arcadeAuthForm{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-top:20px}#view-game #arcadeAuthForm .arcade-actions{grid-column:1/-1}
+#view-game #arcadeInstructions{min-height:34px}#view-game #arcadeScore{font-size:14px;font-variant-numeric:tabular-nums;color:#f3cf85;padding:7px 10px;border:1px solid #4b463d;background:#292b2e;border-radius:8px;white-space:nowrap}
+#view-game #arcadeCanvasHost{border:1px solid #33425a;border-radius:15px;overflow:hidden;background:#141c2d;box-shadow:inset 0 0 50px #07101d}
+#view-game .arcade-stage{margin:0 auto;border-radius:0}#view-game #arcadeCanvasHost canvas{border-radius:0}#view-game .arcade-character-layer{border-radius:0}
+#view-game #arcadeResult:not(:empty),#view-game #arcadeSpinResult:not(:empty){padding:10px 12px;border:1px solid #346257;background:#19352f;border-radius:8px;color:#a4e3ce}
+.arcade-ready{min-height:370px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse,#23374e,#141c2d 70%)}
+.arcade-ready .arcade-bird-art{width:140px;height:127px;mix-blend-mode:lighten;margin-bottom:10px}
+.arcade-ready strong{font-size:16px;color:#dce7f5}.arcade-ready>span:last-child{font-size:11px;color:#8ba0ba}
+#view-game #arcadeWaiting{padding:45px 10px;text-align:center;background:radial-gradient(ellipse,#23374e,transparent);border-radius:12px}
+#view-game .arcade-player-heading{flex-wrap:nowrap;gap:10px;align-items:center;margin:0 0 18px}#view-game #arcadePlayerName{font-size:16px;overflow-wrap:anywhere}#view-game #arcadeSignout{font-size:9px;padding:5px 8px;min-height:30px}
+#arcadePlayerAvatar{width:58px;flex-shrink:0}#arcadePlayerAvatar .arcade-bird-art{width:58px;height:53px}#arcadePlayerAvatar .arcade-bird-legacy{width:34px;height:34px;position:relative;display:block;margin:9px}
+#view-game #arcadeLevel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.arcade-player-metric{padding:11px 7px;background:#0e192a;border:1px solid #29384e;border-radius:9px;text-align:center}
+.arcade-player-metric strong{display:block;font-size:20px;font-weight:700;color:#f0cf90;line-height:1.2;font-variant-numeric:tabular-nums}.arcade-player-metric span{display:block;font-size:9px;color:#8eabc7;margin-top:5px}
+#view-game .arcade progress{appearance:none;height:6px;border:0;border-radius:6px;overflow:hidden;margin-top:13px;background:#263348}#view-game .arcade progress::-webkit-progress-bar{background:#263348}#view-game .arcade progress::-webkit-progress-value{background:linear-gradient(90deg,#4db6cb,#8bdfcd);border-radius:6px}#view-game .arcade progress::-moz-progress-bar{background:#8bdfcd}
+.arcade-subheading{font-size:12px;font-weight:700;margin-top:20px;color:#dce7f6}.arcade-subheading span{display:block;font-size:10px;font-weight:400;color:#8197b4;margin-top:5px}
+#view-game #arcadeColors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:205px;overflow-y:auto;padding:4px}
+#view-game #arcadeColors button{text-align:left;padding:6px;min-width:0;display:flex;gap:4px;align-items:center}#view-game #arcadeColors .arcade-name{font-size:10px;line-height:1.3}#view-game #arcadeColors .arcade-collection-bird{margin-right:2px;flex-shrink:0}
+#view-game #arcadeColors button[aria-pressed=true]{outline:1px solid #efc474;background:#32322d;outline-offset:0}
+#view-game .arcade-drop-panel{margin-top:20px;border-top:1px solid #2a3a51;padding-top:15px}#view-game .arcade-drop-panel>summary{font-size:17px;font-weight:700;color:#f2f5fa;padding:7px 0}#view-game .arcade-drop-panel>summary span{display:block;font-size:10px;font-weight:400;color:#8da2be;margin:5px 0 0 18px}
+#view-game .arcade-wheel-offer{gap:16px;margin:24px 0 16px}#view-game .arcade-wheel-wrap{width:min(100%,278px);filter:drop-shadow(0 6px 18px #0007)}
+#view-game #arcadeWheel{border-color:#d1a861;box-shadow:0 0 0 4px #4c4434}#view-game .arcade-pointer{color:#f7dfad;text-shadow:0 2px 3px #000}
+#view-game .arcade-wheel-hub{background:#111d2e;color:#f8dea1;border:2px solid #a88447;width:67px;height:67px;font-size:11px;letter-spacing:1px}
+#view-game .arcade-token-offer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%;background:#0d1928;border:1px solid #35465c;padding:10px 12px;border-radius:9px;text-align:left}
+#view-game .arcade-token-offer strong{font-size:11px;color:#e7c991;margin:0}#view-game .arcade-token-offer span{font-size:10px;color:#9bafc9}
+#view-game .arcade-all-odds{border:1px solid #2d4058;border-radius:9px;background:#0e1929;padding:0 10px;margin-top:14px}#view-game .arcade-all-odds>summary{font-size:11px;color:#a9bfd9;padding:12px 0}
+#view-game .arcade-odds{grid-template-columns:1fr;max-height:340px;overflow-y:auto}#view-game .arcade-odds-item{padding:6px;border-bottom:1px solid #223349;font-size:11px;color:#bdd0e5}
+#view-game .lb-table{width:100%;border-collapse:collapse}#view-game .lb-table th{font-size:9px;letter-spacing:1px;color:#7f96b4;background:#0e1a2b;text-transform:uppercase;padding:12px 10px;border-color:#27394f}#view-game .lb-table td{padding:8px 10px;color:#c3d2e5;border-bottom:1px solid #25354b;font-size:12px}#view-game .lb-table td:last-child{font-size:17px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:#e5cc9a}#view-game .lb-table th:last-child{text-align:right}
+#view-game .lb-table td:first-child{font-size:12px;color:#7e94af;width:30px}#view-game .lb-table tr:nth-child(-n+3) td{background:#28344830}#view-game .lb-table .arcade-name{font-size:12px}
+#view-game .arcade-leader-character{animation:none}
+@media(max-width:850px){#view-game .arcade{grid-template-columns:1fr;grid-template-areas:"hero" "hours" "notice" "auth" "challenge" "profile" "board";padding:16px;border-radius:20px}#view-game .arcade-hero{padding:24px;min-height:280px}.arcade-hero-art{width:38%}.arcade-hero-bird-front{width:140px;height:127px;left:0}.arcade-hero-bird-back{width:110px;height:100px;left:30%}#view-game .arcade-card{padding:20px}#view-game .arcade-wheel-offer{flex-wrap:nowrap}#view-game .arcade-token-offer{width:auto;display:block}#view-game .arcade-token-offer span{margin-top:7px}}
+@media(max-width:480px){#view-game{padding:12px 6px 30px}#view-game .arcade{padding:12px;gap:13px}#view-game .arcade-hero{padding:22px 18px;min-height:300px}#view-game .arcade-hero-copy{max-width:100%}#view-game .arcade-hero h1{font-size:33px;letter-spacing:-1.2px}.arcade-hero-art{opacity:.2;width:55%;pointer-events:none}.arcade-hero-caption{display:none}#view-game .arcade-hero p{font-size:12px;max-width:230px}.arcade-perks{max-width:240px;font-size:9px}#view-game .arcade-card{padding:16px}#view-game .arcade h2{font-size:18px}#view-game .arcade-wheel-offer{flex-wrap:wrap}#view-game .arcade-token-offer{width:100%;display:flex}#view-game .arcade-token-offer span{margin:0}#view-game #arcadeAuthForm{grid-template-columns:1fr}#view-game .lb-table td{padding:7px 5px}#view-game .lb-table .arcade-name{font-size:11px}#view-game .arcade-leader-character{margin-right:2px;width:51px}#view-game .arcade-player-metric strong{font-size:18px}#view-game .arcade-ready{min-height:310px}}
+#view-game .arcade-name:not(.arcade-default){filter:brightness(1.45);text-shadow:0 0 1px #d6e8ff44}
+
+/* All original skins now use their own PNG bird artwork. */
+.arcade-bird-art.arcade-red,.arcade-bird-art.arcade-yellow,.arcade-bird-art.arcade-blue,.arcade-bird-art.arcade-green,.arcade-bird-art.arcade-orange,.arcade-bird-art.arcade-purple,.arcade-bird-art.arcade-pink,.arcade-bird-art.arcade-teal,.arcade-bird-art.arcade-gold,.arcade-bird-art.arcade-beer,.arcade-bird-art.arcade-pi,.arcade-bird-art.arcade-water,.arcade-bird-art.arcade-fire,.arcade-bird-art.arcade-marble,.arcade-bird-art.arcade-carbon,.arcade-bird-art.arcade-aurora,.arcade-bird-art.arcade-galaxy,.arcade-bird-art.arcade-tidal,.arcade-bird-art.arcade-inferno,.arcade-bird-art.arcade-supernova,.arcade-bird-art.arcade-liquidgold,.arcade-bird-art.arcade-default{background-image:url("../assets/bird-sheet.webp")!important;background-size:614.4% 457.142857%!important;}
+.arcade-red{--bird-x:1.555210%;--bird-y:3.250000%}
+.arcade-yellow{--bird-x:20.995334%;--bird-y:3.250000%}
+.arcade-blue{--bird-x:40.435459%;--bird-y:3.250000%}
+.arcade-green{--bird-x:59.875583%;--bird-y:3.250000%}
+.arcade-orange{--bird-x:79.315708%;--bird-y:3.250000%}
+.arcade-purple{--bird-x:98.755832%;--bird-y:3.250000%}
+.arcade-pink{--bird-x:1.555210%;--bird-y:31.750000%}
+.arcade-teal{--bird-x:20.995334%;--bird-y:31.750000%}
+.arcade-gold{--bird-x:40.435459%;--bird-y:31.750000%}
+.arcade-beer{--bird-x:59.875583%;--bird-y:31.750000%}
+.arcade-pi{--bird-x:79.315708%;--bird-y:31.750000%}
+.arcade-water{--bird-x:98.755832%;--bird-y:31.750000%}
+.arcade-fire{--bird-x:1.555210%;--bird-y:60.000000%}
+.arcade-marble{--bird-x:20.995334%;--bird-y:60.000000%}
+.arcade-carbon{--bird-x:40.435459%;--bird-y:60.000000%}
+.arcade-aurora{--bird-x:59.875583%;--bird-y:60.000000%}
+.arcade-galaxy{--bird-x:79.315708%;--bird-y:60.000000%}
+.arcade-tidal{--bird-x:98.755832%;--bird-y:60.000000%}
+.arcade-inferno{--bird-x:1.555210%;--bird-y:89.000000%}
+.arcade-supernova{--bird-x:20.995334%;--bird-y:89.000000%}
+.arcade-liquidgold{--bird-x:40.435459%;--bird-y:89.000000%}
+.arcade-default{--bird-x:59.875583%;--bird-y:89.000000%}
+#view-game .arcade-stage .arcade-bird-art.arcade-default,#view-game .arcade-ready .arcade-bird-art.arcade-default{mix-blend-mode:normal}
+.arcade-bird-art{background-clip:border-box!important;-webkit-background-clip:border-box!important;color:inherit;text-shadow:none!important}

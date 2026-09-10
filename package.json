@@ -1,0 +1,17 @@
+{
+  "name": "spark-menu",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0",
+    "vite": "^8.2.2"
+  },
+  "type": "module",
+  "private": true
+}
